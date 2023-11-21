@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Cheicksa</string>
+    <string name="boutique">Boutique</string>
+    <string name="restaurant">Restaurant</string>
+    <string name="superMarket">Super Marche</string>
+    <string name="cloths">Vetement</string>
+    <string name="cuisines">Cuisines</string>
+    <string name="search_bar_text">Chercher un restaurant ou une nourriture</string>
+    <string name="delivery_fee">Frais de livaraison <b>%d</b> </string>
+    <string name="devise">TL</string>
+    <string name="space">" "</string>
+    <string name="min_order">min. </string>
+    <string name="devise_sign"><b>₺</b></string>
+    <string name="free_delivery">Livraison gratuite</string>
+    <string name="delivery_time">Livraison %d min</string>
+    <string name="mim_order">"min. <b>%d</b> "</string>
+    <string name="rater_count">%d+ rating</string>
+
+</resources>
