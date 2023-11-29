@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "705545130173",
+    "firebase_url": "https://cheicksa-81df4-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "cheicksa-81df4",
+    "storage_bucket": "cheicksa-81df4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:705545130173:android:15fa419af8c472516f27d4",
+        "android_client_info": {
+          "package_name": "com.example.cheicksa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "705545130173-pjjk0d58m0to0jm9duq57iv8a55nm3af.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.cheicksa",
+            "certificate_hash": "f3a2efebd3f63478b27297e6747f35af6fe5bf36"
+          }
+        },
+        {
+          "client_id": "705545130173-6eohl0gid8e5760laact54lel6lp7s2v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvgqqcJtO3IVMTli00j47QlfWdsLhu5hk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "705545130173-6eohl0gid8e5760laact54lel6lp7s2v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

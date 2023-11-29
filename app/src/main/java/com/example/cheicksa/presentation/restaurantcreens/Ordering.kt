@@ -62,24 +62,24 @@ fun Ordering(
     ) {
 
         val (mealGroupId,restaurantId,mealId) = mealInfo?.split("_")!!
-        val deliveryFee = lesRestaurants.find { it.id == restaurantId?.toLong() }?.deliveryFee
-        val restaurants = lesRestaurants.find { it.id == restaurantId?.toLong() }?.mealsList
+        val deliveryFee = lesRestaurants.find { it.id == restaurantId.toLong() }?.deliveryFee
+        val restaurants = lesRestaurants.find { it.id == restaurantId.toLong() }?.mealsList
         val mealGroup = restaurants?.get(mealGroupId.toInt())
         val meal = mealGroup?.orderScreenDatas?.cards?.get(mealId.toInt())
 
         val bill = Bill(
             initialPrice = meal?.price!!,
-            price = meal?.price!!,
+            price = meal.price,
             amount = 1,
             deliveryFee = deliveryFee!!,
-            tax = 10,
-            discount = 0
+            tax = 10.0,
+            discount = 0.0
         )
 
         Card(
             shape = RoundedCornerShape(10.dp)
         ) {
-            meal?.painter?.let { painterResource(id = it) }?.let {
+            meal.painter.let { painterResource(id = it) }.let {
                 Image(
                     painter = it,
                     contentDescription = "",
@@ -91,9 +91,7 @@ fun Ordering(
             }
         }
         Spacer(modifier = Modifier.height(10.dp))
-        if (meal != null) {
-            OrderingInfo(meal,)
-        }
+        OrderingInfo(meal,)
         Spacer(modifier = Modifier.height(10.dp))
         OrderingCard(discount,billToUpdate=bill)
 

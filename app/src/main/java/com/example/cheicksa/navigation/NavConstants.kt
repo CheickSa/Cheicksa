@@ -2,7 +2,7 @@ package com.example.cheicksa.navigation
 
 object NavConstants {
     const val ROOT_ROUTE = "ROOT_ROUTE"
-
+    const val AUTH_ROUTE = "AUTH_ROUTE"
     const val HOME_SCREEN_ROUTE = "HOME_SCREEN"
 
     const val RESTAURANT_ROUTE = "CUISINE_ROUTE"

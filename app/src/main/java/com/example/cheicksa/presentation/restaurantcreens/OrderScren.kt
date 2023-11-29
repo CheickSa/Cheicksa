@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.cheicksa.R
 import com.example.cheicksa.model.MealsList
 import com.example.cheicksa.model.OrderScreenCardData
@@ -52,7 +53,7 @@ val LazyListState.isScrolled: Boolean
 val orderScreenCardData = OrderScreenCardData(
     title = "Cheeseburger",
     description = "Cheeseburger + Sosis + Frites + Boisson",
-    price = 300,
+    price = 300.0,
     painter = R.drawable.cheeseburger
 )
 
@@ -223,11 +224,10 @@ fun OrderCards(
                 foodName = it.title,
                 ingredient = it.description,
                 price = it.price,
-                painter = it.painter,
-                onClick = {
-                    navController.navigate(RestaurantScreens.Ordering.route + "/" + mealId + "_"+ index.toString())
-                }
-            )
+                painter = it.painter
+            ) {
+                navController.navigate(RestaurantScreens.Ordering.route + "/" + mealId + "_" + index.toString())
+            }
         }
     }
 }
@@ -255,7 +255,7 @@ fun RestaurantInfo(
         RestaurantInfoContainer(
             color = Color.Green,
             painter = painterResource(id = R.drawable.time),
-            details = if (restaurant.deliveryFee==0) stringResource(R.string.free_delivery) else
+            details = if (restaurant.deliveryFee==0.0) stringResource(R.string.free_delivery) else
                 stringResource(id = R.string.delivery_fee,restaurant.deliveryFee)+
                 stringResource(id = R.string.devise),
             additionalDetail = "",
@@ -292,7 +292,7 @@ fun RestaurantInfo(
 @Composable
 fun OrderScreen_() {
     CheicksaTheme{
-        //OrderScreen(rememberNavController(), restaurantId = 0L )
-        Meals()
+        OrderScreen(rememberNavController(), restaurantId = 0L )
+
     }
 }

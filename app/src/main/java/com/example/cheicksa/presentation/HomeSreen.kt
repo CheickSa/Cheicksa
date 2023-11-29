@@ -222,8 +222,8 @@ val lesRestaurants = listOf(
         image = R.drawable.pizza,
         name = "Pizza Bulls",
         category = "Pizza",
-        deliveryFee = 30,
-        minOrder = 50,
+        deliveryFee = 30.0,
+        minOrder = 50.0,
         mealsList = listOf(
             MealsList(
                 mealTitle = "Populaire",
@@ -233,7 +233,7 @@ val lesRestaurants = listOf(
                         OrderScreenCardData(
                             title = "Good Pizza",
                             description = "Pizza + Cheese + Frite + Boisson",
-                            price = 300,
+                            price = 300.0,
                             painter = R.drawable.pizza
                         )
                     )
@@ -247,8 +247,8 @@ val lesRestaurants = listOf(
         image = R.drawable.burger,
         name = "Burger Star",
         category = "Burger",
-        deliveryFee = 30,
-        minOrder = 50,
+        deliveryFee = 30.0,
+        minOrder = 50.0,
         mealsList = listOf(
             MealsList(
                 mealTitle = "Populaire",
@@ -258,7 +258,7 @@ val lesRestaurants = listOf(
                         OrderScreenCardData(
                             title = "Good Burger",
                             description = "Burger + Cheese + Frite + Boisson",
-                            price = 200,
+                            price = 200.0,
                             painter = R.drawable.burger
                         )
                     )
@@ -273,8 +273,8 @@ val lesRestaurants = listOf(
         name = "Dessert King",
         category = "Dessert",
         mealsList = mealsList,
-        deliveryFee = 30,
-        minOrder = 50,
+        deliveryFee = 30.0,
+        minOrder = 50.0,
         foodEmoji = "\uD83C\uDF70"
     ),
     RestaurantData(
@@ -283,8 +283,8 @@ val lesRestaurants = listOf(
         name = "Petit Dejeuner",
         category = "Petit Dejeuner",
         mealsList = mealsList,
-        deliveryFee = 30,
-        minOrder = 50,
+        deliveryFee = 30.0,
+        minOrder = 50.0,
         foodEmoji = "\uD83E\uDD50"
     ),
     RestaurantData(
@@ -293,8 +293,8 @@ val lesRestaurants = listOf(
         name = "Pizza Bulls",
         category = "Pizza",
         mealsList = mealsList,
-        deliveryFee = 30,
-        minOrder = 50,
+        deliveryFee = 30.0,
+        minOrder = 50.0,
     ),
     RestaurantData(
         id = 2L,
@@ -302,8 +302,8 @@ val lesRestaurants = listOf(
         name = "Burger Star",
         category = "Burger",
         mealsList = mealsList,
-        deliveryFee = 30,
-        minOrder = 50,
+        deliveryFee = 30.0,
+        minOrder = 50.0,
     ),
     RestaurantData(
         id = 3L,
@@ -311,8 +311,8 @@ val lesRestaurants = listOf(
         name = "Dessert King",
         category = "Dessert",
         mealsList = mealsList,
-        deliveryFee = 30,
-        minOrder = 50,
+        deliveryFee = 30.0,
+        minOrder = 50.0,
     ),
     RestaurantData(
         id = 4L,
@@ -320,8 +320,8 @@ val lesRestaurants = listOf(
         name = "Petit Dejeuner",
         category = "Petit Dejeuner",
         mealsList = mealsList,
-        deliveryFee = 30,
-        minOrder = 50,
+        deliveryFee = 30.0,
+        minOrder = 50.0,
     )
 )
 

@@ -1,6 +1,5 @@
 package com.example.cheicksa.presentation.common_ui.restaurant
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,7 +46,7 @@ import com.example.cheicksa.R
 fun OrderContainer(
     foodName: String,
     ingredient: String,
-    price: Int,
+    price: Double,
     painter: Int,
     onClick: () -> Unit
 ) {

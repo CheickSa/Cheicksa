@@ -26,7 +26,7 @@ class OrderingViewModel(
             it.copy(price = _bill.value.initialPrice * _bill.value.amount,)
         }
         _bill.update {
-            it.copy(tax = ((_bill.value.price).toDouble() * 0.1).toInt(),)
+            it.copy(tax = (_bill.value.price) * 0.1)
         }
         _bill.update {
             it.copy(total = _bill.value.price + _bill.value.tax + _bill.value.deliveryFee)

@@ -10,7 +10,7 @@ sealed class StoreScreens(
 ){
     data object HomeSreen: StoreScreens(
         name = "home",
-        route = this.superMarche
+        route = this.home
     )
     data object SuperMarche: StoreScreens(
         name = "Super Marche",
