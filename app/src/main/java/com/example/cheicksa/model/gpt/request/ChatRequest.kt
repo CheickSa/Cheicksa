@@ -13,5 +13,5 @@ data class ChatRequest(
     @SerialName("tools")
     val tools: List<Tool>,
     @SerialName("tool_choice")
-    val toolChoice: String
+    val tool_choice: String
 )

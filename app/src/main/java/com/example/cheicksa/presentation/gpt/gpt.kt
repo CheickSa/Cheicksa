@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Send
@@ -53,16 +54,27 @@ import com.example.cheicksa.ui.theme.CheicksaTheme
 fun ChatScreen(navController: NavController) {
     val chatViewModel = hiltViewModel<GptViewModel>()
     val response by chatViewModel.response.collectAsState()
+    val error by chatViewModel.error
     Box(
         modifier = Modifier
             .fillMaxSize()
 
     ) {
 
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 80.dp)
+        ) {
             items(1) {
                 Box {
-                    Text(text = response.toString())
+                    Column {
+                        SelectionContainer {
+                            Text(text = response.toString())
+                            Text(text =error.toString())
+                        }
+
+                    }
                 }
             }
         }
@@ -93,6 +105,7 @@ fun BoxScope.MessageField(
 ) {
     var text by remember { mutableStateOf("") }
     // android:windowSoftInputMode="adjustResize" in <Activity> in AndroidManifest.xml is required for this to work
+    // TODO: Blocker le curseur de la textfield pour ne pas pouvoir changer le placeholder
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
