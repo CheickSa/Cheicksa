@@ -35,10 +35,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cheicksa.R
-import com.example.cheicksa.model.MealsList
-import com.example.cheicksa.model.OrderScreenCardData
-import com.example.cheicksa.model.OrderScreenData
-import com.example.cheicksa.model.RestaurantData
+import com.example.cheicksa.model.restaurant.MealsList
+import com.example.cheicksa.model.restaurant.OrderScreenCardData
+import com.example.cheicksa.model.restaurant.OrderScreenData
+import com.example.cheicksa.model.restaurant.RestaurantData
 import com.example.cheicksa.navigation.RestaurantScreens
 import com.example.cheicksa.presentation.DiscountBar
 import com.example.cheicksa.presentation.common_ui.restaurant.OrderContainer

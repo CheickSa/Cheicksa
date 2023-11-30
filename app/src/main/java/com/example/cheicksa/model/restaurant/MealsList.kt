@@ -1,4 +1,4 @@
-package com.example.cheicksa.model
+package com.example.cheicksa.model.restaurant
 
 data class MealsList(
     val mealTitle: String,

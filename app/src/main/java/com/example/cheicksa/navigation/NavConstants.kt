@@ -9,4 +9,6 @@ object NavConstants {
     const val CLOTH_ROUTE = "CLOTH_ROUTE"
     const val MARKET_ROUTE = "MARKET_ROUTE"
     const val BOUTIQUE_ROUTE = "BOUTIQUE_ROUTE"
+
+    const val GPT_SCREEN_ROUTE = "GPT_SCREEN_ROUTE"
 }

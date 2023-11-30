@@ -1,4 +1,4 @@
-package com.example.cheicksa.model
+package com.example.cheicksa.model.restaurant
 
 import kotlinx.serialization.Serializable
 

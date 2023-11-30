@@ -1,7 +1,7 @@
 package com.example.cheicksa.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
-import com.example.cheicksa.model.Bill
+import com.example.cheicksa.model.restaurant.Bill
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

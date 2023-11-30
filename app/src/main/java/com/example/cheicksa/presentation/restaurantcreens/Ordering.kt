@@ -40,9 +40,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cheicksa.R
-import com.example.cheicksa.model.Bill
-import com.example.cheicksa.model.Discount
-import com.example.cheicksa.model.OrderScreenCardData
+import com.example.cheicksa.model.restaurant.Bill
+import com.example.cheicksa.model.restaurant.Discount
+import com.example.cheicksa.model.restaurant.OrderScreenCardData
 import com.example.cheicksa.presentation.authentification.BlackButton
 import com.example.cheicksa.presentation.lesRestaurants
 import com.example.cheicksa.presentation.viewmodels.OrderingViewModel

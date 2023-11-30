@@ -1,6 +1,6 @@
 package com.example.cheicksa.repository
 
-import com.example.cheicksa.model.Stores
+import com.example.cheicksa.model.restaurant.Stores
 import com.example.cheicksa.remote.Api
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -14,15 +14,17 @@ class StoreRepository @Inject constructor(
         val response = api.getAllStore()
         return withContext(Dispatchers.IO) {
             if (response.isSuccessful) response.body()
-            else mutableListOf(Stores(
+            else mutableListOf(
+                Stores(
                 id=0L,
                 title = "error",
                 description = "${response.message()}",
                 image = "errror"
-            ))
+            )
+            )
         }
     }
-    suspend fun saveStore(stores: Stores): Stores{
+    suspend fun saveStore(stores: Stores): Stores {
         return api.saveStore(stores)
     }
 
@@ -30,7 +32,7 @@ class StoreRepository @Inject constructor(
         return api.saveStores(stores)
     }
 
-    suspend fun updateImage(stores: Stores): Stores{
+    suspend fun updateImage(stores: Stores): Stores {
         return api.updateImage(stores)
     }
 

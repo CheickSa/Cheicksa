@@ -1,6 +1,6 @@
 package com.example.cheicksa.remote
 
-import com.example.cheicksa.model.Stores
+import com.example.cheicksa.model.restaurant.Stores
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE

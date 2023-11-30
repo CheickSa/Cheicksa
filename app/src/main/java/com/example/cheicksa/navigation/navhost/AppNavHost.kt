@@ -5,10 +5,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import com.example.cheicksa.navigation.GptScreens
 import com.example.cheicksa.navigation.NavConstants
 import com.example.cheicksa.navigation.navgraphs.authNav
 import com.example.cheicksa.navigation.navgraphs.boutiqueNav
 import com.example.cheicksa.navigation.navgraphs.clothsNav
+import com.example.cheicksa.navigation.navgraphs.gptNav
 import com.example.cheicksa.navigation.navgraphs.homeNav
 import com.example.cheicksa.navigation.navgraphs.restaurantNav
 import com.example.cheicksa.navigation.navgraphs.superMarketNav
@@ -26,7 +28,7 @@ fun AppNavHost(
     }
     NavHost(
         navController = navController,
-        startDestination = startDestination,
+        startDestination = NavConstants.GPT_SCREEN_ROUTE,
         route = NavConstants.ROOT_ROUTE
     ){
         homeNav(navController)
@@ -35,5 +37,6 @@ fun AppNavHost(
         superMarketNav(navController)
         boutiqueNav(navController)
         authNav(navController)
+        gptNav(navController)
     }
 }
