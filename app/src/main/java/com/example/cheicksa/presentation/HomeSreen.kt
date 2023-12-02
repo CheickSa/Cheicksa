@@ -33,6 +33,7 @@ import com.example.cheicksa.model.restaurant.MealsList
 import com.example.cheicksa.model.restaurant.OrderScreenCardData
 import com.example.cheicksa.model.restaurant.OrderScreenData
 import com.example.cheicksa.model.restaurant.RestaurantData
+import com.example.cheicksa.navigation.GptScreens
 import com.example.cheicksa.navigation.RestaurantScreens
 import com.example.cheicksa.navigation.StoreScreens
 import com.example.cheicksa.presentation.common_ui.restaurant.CuisineContainer
@@ -52,7 +53,9 @@ fun HomeScreen(
             .padding(bottom = 20.dp)
     ){
         item { SearchBar(
-            onClick = {},
+            onClick = {
+                navController.navigate(GptScreens.Gpt.route)
+            },
             text = stringResource(R.string.search_bar_text)
         ) }
         item { Stores(navController) }
