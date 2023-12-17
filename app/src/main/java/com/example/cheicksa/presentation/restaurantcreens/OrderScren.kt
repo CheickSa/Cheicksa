@@ -1,5 +1,6 @@
 package com.example.cheicksa.presentation.restaurantcreens
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,29 +22,32 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cheicksa.R
 import com.example.cheicksa.model.restaurant.MealsList
 import com.example.cheicksa.model.restaurant.OrderScreenCardData
-import com.example.cheicksa.model.restaurant.OrderScreenData
 import com.example.cheicksa.model.restaurant.RestaurantData
 import com.example.cheicksa.navigation.RestaurantScreens
 import com.example.cheicksa.presentation.DiscountBar
 import com.example.cheicksa.presentation.common_ui.restaurant.OrderContainer
 import com.example.cheicksa.presentation.common_ui.restaurant.RestaurantInfoContainer
 import com.example.cheicksa.presentation.lesRestaurants
+import com.example.cheicksa.presentation.viewmodels.MenuViewModel
 import com.example.cheicksa.ui.theme.CheicksaTheme
 import kotlinx.coroutines.launch
 
@@ -54,53 +58,42 @@ val orderScreenCardData = OrderScreenCardData(
     title = "Cheeseburger",
     description = "Cheeseburger + Sosis + Frites + Boisson",
     price = 300.0,
-    painter = R.drawable.cheeseburger
+    imageUlr = "https://www.mcdonalds.com/is/image/content/dam/usa/nfl/nutrition/items/hero/desktop/t-mcdonalds-Cheeseburger.jpg",
+    type = "Plat",
 )
 
 val mealsList = listOf(
     MealsList(
         mealTitle = "Populaire",
-        orderScreenDatas = OrderScreenData(
-            title = "Populaires",
-            cards = listOf(
-                orderScreenCardData,
-                orderScreenCardData,
-                orderScreenCardData,
-            ),
-        )
+        cards = listOf(
+            orderScreenCardData,
+            orderScreenCardData,
+            orderScreenCardData,
+        ),
     ),
     MealsList(
         mealTitle = "Plats",
-        orderScreenDatas = OrderScreenData(
-            title = "Les Plats",
-            cards = listOf(
-                orderScreenCardData,
-                orderScreenCardData,
-                orderScreenCardData,
-            ),
-        )
+        cards = listOf(
+            orderScreenCardData,
+            orderScreenCardData,
+            orderScreenCardData,
+        ),
     ),
     MealsList(
         mealTitle = "Boissons",
-        orderScreenDatas = OrderScreenData(
-            title = "Les Boissons",
-            cards = listOf(
-                orderScreenCardData,
-                orderScreenCardData,
-                orderScreenCardData,
-            ),
-        )
+        cards = listOf(
+            orderScreenCardData,
+            orderScreenCardData,
+            orderScreenCardData,
+        ),
     ),
     MealsList(
         mealTitle = "Menu",
-        orderScreenDatas = OrderScreenData(
-            title = "Les Menus",
-            cards = listOf(
-                orderScreenCardData,
-                orderScreenCardData,
-                orderScreenCardData,
-            ),
-        )
+        cards = listOf(
+            orderScreenCardData,
+            orderScreenCardData,
+            orderScreenCardData,
+        ),
     )
 
 )
@@ -109,21 +102,21 @@ val mealsList = listOf(
 @Composable
 fun OrderScreen(
     navController: NavController,
-    restaurantId: Long?,
+    menuViewModel: MenuViewModel = viewModel(LocalContext.current as ComponentActivity),
 ) {
     val state = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     var position by rememberSaveable {
         mutableStateOf(0)
     }
-    val restaurant = lesRestaurants.find { it.id == restaurantId!! }
+    val restaurant = remember { menuViewModel.restaurant.value }
     Scaffold(
         topBar = {
             Column (
                 modifier = Modifier
                     .height(if (state.isScrolled) 0.dp else 270.dp)
             ){
-                if (restaurant != null) { RestaurantInfo(restaurant = restaurant) }
+                RestaurantInfo(restaurant = restaurant)
                 Spacer(modifier = Modifier.height(15.dp))
                 DiscountBar()
             }
@@ -138,7 +131,7 @@ fun OrderScreen(
                 modifier = Modifier.padding(start = 20.dp, bottom = 10.dp, end = 20.dp)
             ) {
                 item {
-                    mealsList.forEachIndexed { ind, meal ->
+                    restaurant.mealsList.forEachIndexed { ind, meal ->
                         Meals(meal.mealTitle, onClick = {
                             coroutineScope.launch {
                                 state.animateScrollToItem(ind)
@@ -152,15 +145,14 @@ fun OrderScreen(
             LazyColumn(
                 state = state,
             ) {
-                val restaurants = lesRestaurants.find { it.id == restaurantId }?.mealsList
-                restaurants?.size?.let { it1 ->
-                    items(it1) {mealId->
-                        OrderCards(
-                            data=restaurants[mealId].orderScreenDatas,
-                            navController = navController,
-                            mealId = "$mealId"+"_"+"$restaurantId",
-                        )
-                    }
+                // les nourritures du restaurant
+                val restaurants = restaurant.mealsList
+                items(restaurants.size) {mealId->
+                    OrderCards(
+                        data=restaurants[mealId],
+                        navController = navController,
+                        menuViewModel = menuViewModel
+                    )
                 }
 
             }
@@ -199,9 +191,9 @@ fun Meals(
 
 @Composable
 fun OrderCards(
-    data: OrderScreenData,
+    data: MealsList,
     navController: NavController,
-    mealId: String,
+    menuViewModel: MenuViewModel
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -211,7 +203,7 @@ fun OrderCards(
     ) {
         Spacer(modifier = Modifier.height(5.dp))
         Text(
-            text = data.title,
+            text = data.mealTitle,
             fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
             fontSize = MaterialTheme.typography.titleLarge.fontSize,
             color = MaterialTheme.colorScheme.primary,
@@ -219,14 +211,15 @@ fun OrderCards(
                 .fillMaxWidth()
                 .padding(start = 10.dp, end = 10.dp)
         )
-        data.cards.forEachIndexed {index,it->
+        data.cards.forEachIndexed { _, it->
             OrderContainer(
                 foodName = it.title,
                 ingredient = it.description,
                 price = it.price,
-                painter = it.painter
+                image = it.imageUlr
             ) {
-                navController.navigate(RestaurantScreens.Ordering.route + "/" + mealId + "_" + index.toString())
+                menuViewModel.setOrder(it)
+                navController.navigate(RestaurantScreens.Ordering.route)
             }
         }
     }
@@ -292,7 +285,7 @@ fun RestaurantInfo(
 @Composable
 fun OrderScreen_() {
     CheicksaTheme{
-        OrderScreen(rememberNavController(), restaurantId = 0L )
+        OrderScreen(rememberNavController())
 
     }
 }

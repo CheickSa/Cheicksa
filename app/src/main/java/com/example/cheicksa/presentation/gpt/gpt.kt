@@ -126,13 +126,13 @@ fun ChatScreen(navController: NavController) {
                                 .height(225.dp)
                                 .padding(start = 16.dp, end = 16.dp, top = 16.dp),
                             textModifier = Modifier.padding(start = 16.dp),
-                            painter = painterResource(id = restaurant.image),
+                            image = restaurant.imageUrl,
                             name = restaurant.name,
                             category = restaurant.category,
                             mimOrder = restaurant.minOrder,
                             deliveryFee = restaurant.deliveryFee,
-                            navController = navController,
-                            id = restaurant.id
+                            deliveryTime = restaurant.deliveryTime,
+                            isVerified = restaurant.isVerified,
                         )
                     }
                 }
@@ -342,15 +342,7 @@ fun ChatContainer(
         }
     }
 }
-@Composable
-fun customShape() = GenericShape { size, _ ->
-    moveTo(-1f, 0f)
-    lineTo(size.width - 1f, 0f)
-    lineTo(size.width, size.height - 40.dp.value) // Adjust the angle by modifying this line
-    lineTo(size.width / 2, size.height)
-    lineTo(0f, size.height - 40.dp.value)
-    close()
-}
+
 
 @Preview
 @Composable

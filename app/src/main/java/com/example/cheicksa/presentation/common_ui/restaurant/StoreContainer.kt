@@ -2,6 +2,7 @@ package com.example.cheicksa.presentation.common_ui.restaurant
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -44,7 +45,8 @@ fun StoreContainer(
     painter: Painter = painterResource(id = R.drawable.sup_market),
     imageModifier: Modifier,
     title: String,
-    onClick: ()-> Unit = {}
+    onClick: ()-> Unit = {},
+    applyComingSoon: Boolean = false
 ) {
     Card (
         onClick = onClick,
@@ -63,13 +65,24 @@ fun StoreContainer(
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.BottomEnd,
             )
-            Text(
-                text = title,
-                fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
-                fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 5.dp, start = 5.dp)
-            )
+            Row {
+                Text(
+                    text = title,
+                    fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 5.dp, start = 5.dp)
+                )
+                if (applyComingSoon){
+                    Text(
+                        text = stringResource(id = R.string.comingSoon),
+                        fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 5.dp, start = 5.dp)
+                    )
+                }
+            }
         }
     }
 }

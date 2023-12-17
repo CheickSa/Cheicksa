@@ -36,6 +36,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -52,6 +56,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -75,6 +81,7 @@ import com.example.cheicksa.ui.theme.CheicksaTheme
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -94,142 +101,178 @@ fun SignIn(navController: NavController) {
     var checked by remember { mutableStateOf(false) }
     var showCheckBoxError by remember { mutableStateOf(false) }
 
-    val errorMessage by remember { fireBaseViewModel.popupNotification }
+    var errorMessage by remember { fireBaseViewModel.popupNotification }
     val signedIn by remember { fireBaseViewModel.signedIn }
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    Box {
-        Column(
+    val scope = rememberCoroutineScope()
+
+    Scaffold (
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.testTag("homeSnackbarHost")
+                    .fillMaxSize()
+            )
+        }
+    ){
+        if (errorMessage != null) { errorMessage="" }
+        Box (
             modifier = Modifier
-                .fillMaxSize(),
-        ) {
-            Box(
+                .padding(top = it.calculateTopPadding())
+        ){
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize(),
             ) {
-                Text(
-                    text = stringResource(R.string.register),
-                    textAlign = TextAlign.Center,
-                    fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-                    fontWeight = MaterialTheme.typography.headlineLarge.fontWeight
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.register),
+                        textAlign = TextAlign.Center,
+                        fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                        fontWeight = MaterialTheme.typography.headlineLarge.fontWeight
+                    )
+                }
+                Spacer(modifier = Modifier.height(15.dp))
+                AuthTextField(
+                    leadingIcon = painterResource(id = R.drawable.profile),
+                    value = stringResource(R.string.name_surname),
+                    isError = isNameError,
+                    onNext = { /*TODO*/ },
+                    onDone = { /*TODO*/ },
+                    imeAction = ImeAction.Next,
+                    isPasswordField = false,
+                    onValueChange = { name = it; isNameError = false }
                 )
-            }
-            Spacer(modifier = Modifier.height(15.dp))
-            AuthTextField(
-                leadingIcon = painterResource(id = R.drawable.profile),
-                value = name.ifEmpty { stringResource(R.string.name_surname) },
-                isError = isNameError,
-                onNext = { /*TODO*/ },
-                onDone = { /*TODO*/ },
-                imeAction = ImeAction.Next,
-                isPasswordField = false,
-                onValueChange = { name = it; isNameError = false }
-            )
-            Spacer(modifier = Modifier.height(15.dp))
-            AuthTextField(
-                leadingIcon = painterResource(id = R.drawable.email_icon),
-                value = email.ifEmpty { stringResource(R.string.email) },
-                isError = isEmailError,
-                onNext = { /*TODO*/ },
-                onDone = { /*TODO*/ },
-                imeAction = ImeAction.Next,
-                isPasswordField = false,
-                keyboardType = KeyboardType.Email,
-                onValueChange = { email = it; isEmailError = false }
-            )
-            Spacer(modifier = Modifier.height(15.dp))
-            AuthTextField(
-                leadingIcon = painterResource(id = R.drawable.telephone_icon),
-                value = phone.ifEmpty { stringResource(R.string.phone_number) },
-                isError = isPhoneError,
-                onNext = { /*TODO*/ },
-                onDone = { /*TODO*/ },
-                imeAction = ImeAction.Next,
-                isPasswordField = false,
-                keyboardType = KeyboardType.Phone,
-                onValueChange = { phone = it; isPhoneError = false }
-            )
-            Spacer(modifier = Modifier.height(15.dp))
-            AuthTextField(
-                leadingIcon = painterResource(id = R.drawable.mot_de_passe),
-                value = password.ifEmpty { stringResource(R.string.password) },
-                isError = isPasswordError,
-                onNext = { /*TODO*/ },
-                onDone = { /*TODO*/ },
-                imeAction = ImeAction.Next,
-                isPasswordField = true,
-                onValueChange = { password = it; isPasswordError = false }
-            )
-            Spacer(modifier = Modifier.height(30.dp))
-            BlackButton(
-                onClick = {
-                    val emailPattern = "[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}".toRegex()
-                    when {
-                        name.isEmpty() -> {
-                            isNameError = true
-                            // fireBaseViewModel.popupNotification.value = "Veuillez remplir tous les champs"
-                        }
+                Spacer(modifier = Modifier.height(15.dp))
+                AuthTextField(
+                    leadingIcon = painterResource(id = R.drawable.email_icon),
+                    value = stringResource(R.string.email),
+                    isError = isEmailError,
+                    onNext = { /*TODO*/ },
+                    onDone = { /*TODO*/ },
+                    imeAction = ImeAction.Next,
+                    isPasswordField = false,
+                    keyboardType = KeyboardType.Email,
+                    onValueChange = { email = it; isEmailError = false }
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                AuthTextField(
+                    leadingIcon = painterResource(id = R.drawable.telephone_icon),
+                    value = stringResource(R.string.phone_number) ,
+                    isError = isPhoneError,
+                    onNext = { /*TODO*/ },
+                    onDone = { /*TODO*/ },
+                    imeAction = ImeAction.Next,
+                    isPasswordField = false,
+                    keyboardType = KeyboardType.Phone,
+                    onValueChange = { phone = it; isPhoneError = false }
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                AuthTextField(
+                    leadingIcon = painterResource(id = R.drawable.mot_de_passe),
+                    value = stringResource(R.string.password),
+                    isError = isPasswordError,
+                    onNext = { /*TODO*/ },
+                    onDone = { /*TODO*/ },
+                    imeAction = ImeAction.Next,
+                    isPasswordField = true,
+                    onValueChange = { password = it; isPasswordError = false }
+                )
+                Spacer(modifier = Modifier.height(30.dp))
 
-                        email.isEmpty() || !email.matches(emailPattern) -> isEmailError = true
-                        phone.isEmpty() -> isPhoneError = true
-                        password.isEmpty() -> isPasswordError = true
-                        !checked -> showCheckBoxError = true
-                        checked -> showCheckBoxError = false
-                        !isNameError && !isEmailError && !isPhoneError && !isPasswordError && !showCheckBoxError -> {
-                            fireBaseViewModel.onSignUp(email, password, phone)
-                            //TODO : impliment email verification and phone verification
+                val emailPattern = "[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}".toRegex()
+                when {
+                    name.isEmpty() -> { isNameError = true
+                        // fireBaseViewModel.popupNotification.value = "Veuillez remplir tous les champs"
+                    }
+                    email.isEmpty() || !email.matches(emailPattern) -> isEmailError = true
+                    phone.isEmpty() -> isPhoneError = true
+                    password.isEmpty() -> isPasswordError = true
+                    !checked -> showCheckBoxError = true
+                    checked -> showCheckBoxError = false
+
+
+                }
+                BlackButton(
+                    onClick = {
+                        if (!isNameError && !isEmailError && !isPhoneError && !isPasswordError && !showCheckBoxError) {
+                            fireBaseViewModel.onSignUp(email, password, phone.trim(),)
+                            //fireBaseViewModel.verifyPhone(phone)
                             if (signedIn) {
-                                navController.navigate(StoreScreens.HomeSreen.route) {
-                                    popUpTo(AuthScreens.Register.route) {
-                                        inclusive = true
+                                scope.launch {
+                                    navController.navigate(StoreScreens.HomeSreen.route) {
+                                        popUpTo(AuthScreens.Register.route) {
+                                            //inclusive = true
+                                        }
                                     }
                                 }
                             } else {
-                                Toast.makeText(
-                                    navController.context,
-                                    errorMessage.toString(),
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                scope.launch {
+                                    delay(1500)
+                                    if (errorMessage?.contains("address",true)==true){
+                                        isEmailError = true
+                                    }
+                                    else if (errorMessage?.contains("password",true)==true){
+                                        isPasswordError = true
+                                    }
+                                    snackbarHostState.showSnackbar(
+                                        message = errorMessage.toString(),
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                             }
                         }
-                    }
-                },
-                text = stringResource(R.string.register)
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            PolicyText(
-                checked = checked,
-                onClick = { checked = it },
-                showError = showCheckBoxError
-
-            )
-            Spacer(modifier = Modifier.height(40.dp))
-            Section()
-            Spacer(modifier = Modifier.height(30.dp))
-            Auth2(
-                navigate = {
-                    if (signedIn) {
-                        navController.navigate(StoreScreens.HomeSreen.route) {
-                            popUpTo(AuthScreens.Register.route) {
-                                inclusive = true
-                            }
+                    },
+                    text = stringResource(R.string.register)
+                )
+                if (signedIn) {
+                    navController.navigate(StoreScreens.HomeSreen.route) {
+                        popUpTo(AuthScreens.Register.route) {
+                            //inclusive = true
                         }
                     }
                 }
-            )
-            Spacer(modifier = Modifier.height(25.dp))
-            GoRegister(
-                onClick = { navController.navigate(AuthScreens.Login.route) }
-            )
-        }
-        if (fireBaseViewModel.inProgress.value) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
-                color = MaterialTheme.colorScheme.primary
-            )
+                Spacer(modifier = Modifier.height(10.dp))
+                PolicyText(
+                    checked = checked,
+                    onClick = { checked = it },
+                    showError = showCheckBoxError
+
+                )
+                Spacer(modifier = Modifier.height(40.dp))
+                Section()
+                Spacer(modifier = Modifier.height(30.dp))
+                Auth2(
+                    navigate = {
+                        if (signedIn) {
+                            navController.navigate(StoreScreens.HomeSreen.route) {
+                                popUpTo(AuthScreens.Register.route) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    }
+                )
+                Spacer(modifier = Modifier.height(25.dp))
+                GoRegister(
+                    onClick = { navController.navigate(AuthScreens.Login.route) }
+                )
+            }
+            if (fireBaseViewModel.inProgress.value) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
+
 
 }
 

@@ -28,7 +28,7 @@ fun AppNavHost(
     }
     NavHost(
         navController = navController,
-        startDestination = NavConstants.GPT_SCREEN_ROUTE,
+        startDestination = NavConstants.HOME_SCREEN_ROUTE,
         route = NavConstants.ROOT_ROUTE
     ){
         homeNav(navController)

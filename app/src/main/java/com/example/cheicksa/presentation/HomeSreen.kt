@@ -1,5 +1,7 @@
 package com.example.cheicksa.presentation
 
+import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,13 +19,18 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cheicksa.R
@@ -31,7 +38,6 @@ import com.example.cheicksa.model.restaurant.Club
 import com.example.cheicksa.model.restaurant.Cuisine
 import com.example.cheicksa.model.restaurant.MealsList
 import com.example.cheicksa.model.restaurant.OrderScreenCardData
-import com.example.cheicksa.model.restaurant.OrderScreenData
 import com.example.cheicksa.model.restaurant.RestaurantData
 import com.example.cheicksa.navigation.GptScreens
 import com.example.cheicksa.navigation.RestaurantScreens
@@ -41,12 +47,17 @@ import com.example.cheicksa.presentation.common_ui.restaurant.RestaurantContaine
 import com.example.cheicksa.presentation.common_ui.restaurant.SearchBar
 import com.example.cheicksa.presentation.common_ui.restaurant.StoreContainer
 import com.example.cheicksa.presentation.restaurantcreens.mealsList
+import com.example.cheicksa.presentation.viewmodels.MenuViewModel
 import com.example.cheicksa.ui.theme.CheicksaTheme
 
 @Composable
 fun HomeScreen(
-    navController: NavController
+    navController: NavController,
+    menuViewModel: MenuViewModel = viewModel()
 ) {
+    val restaurants by menuViewModel.restaurants.collectAsState()
+
+
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(20.dp),
         modifier = Modifier
@@ -54,6 +65,7 @@ fun HomeScreen(
     ){
         item { SearchBar(
             onClick = {
+
                 navController.navigate(GptScreens.Gpt.route)
             },
             text = stringResource(R.string.search_bar_text)
@@ -61,6 +73,10 @@ fun HomeScreen(
         item { Stores(navController) }
         item { DiscountBar() }
         item { Cuisines(navController=navController) }
+        item { Restaurant(
+            navController=navController,
+            restaurants = restaurants
+        ) }
         item { Restaurant(navController=navController) }
     }
 }
@@ -179,17 +195,21 @@ fun DiscountBar(
 
 
 val cuisinesList = listOf(
-    Cuisine(category = "Pizza", R.drawable.pizza, ),
-    Cuisine(category = "Burger", R.drawable.burger,),
-    Cuisine(category = "Dessert", R.drawable.dessert,),
-    Cuisine(category = "Petit Dejeuner", R.drawable.petit_dej),
+    Cuisine(title = "Pizza", ),
+    Cuisine(title = "Burger", ),
+    Cuisine(title = "Dessert", ),
+    Cuisine(title = "Petit Dejeuner",),
 )
 
 @Composable
 fun Cuisines(
-    cuisines: List<Cuisine> = cuisinesList,
-    navController: NavController
+    navController: NavController,
+    menuViewModel: MenuViewModel = viewModel(LocalContext.current as ComponentActivity)
+
 ) {
+    val cuisines by menuViewModel.cuisines.collectAsState()
+    val cuisineLoding by remember { menuViewModel.cuisineLoading }
+
     Column {
         Text(
             text = stringResource(id = R.string.cuisines),
@@ -203,13 +223,21 @@ fun Cuisines(
             modifier = Modifier.padding(start = 20.dp, end = 20.dp),
             horizontalArrangement = Arrangement.Center
         ) {
+            if (cuisines.isEmpty()){
+                items(4){
+                    CuisineContainer()
+                    Spacer(modifier = Modifier.width(15.dp))
+                }
+            }
             items(cuisines.size) {
                 val cuisine = cuisines[it]
                 CuisineContainer(
-                    painter = painterResource(cuisine.image),
-                    title = cuisine.category,
-                    onClick = { navController.navigate(RestaurantScreens.Cuisine.route +"/"+ cuisine.category) }
+                    imageUrl = cuisine.imageUrl,
+                    title = cuisine.title,
+                    onClick = { navController.navigate(RestaurantScreens.Cuisine.route) },
+                    loading = cuisineLoding
                 )
+                Log.d("a", cuisineLoding.toString())
                 Spacer(modifier = Modifier.width(15.dp))
             }
         }
@@ -221,33 +249,9 @@ fun Cuisines(
 
 val lesRestaurants = listOf(
     RestaurantData(
-        id = 1L,
-        image = R.drawable.pizza,
-        name = "Pizza Bulls",
-        category = "Pizza",
-        deliveryFee = 30.0,
-        minOrder = 50.0,
-        mealsList = listOf(
-            MealsList(
-                mealTitle = "Populaire",
-                orderScreenDatas = OrderScreenData(
-                    title = "Populaires",
-                    cards = listOf(
-                        OrderScreenCardData(
-                            title = "Good Pizza",
-                            description = "Pizza + Cheese + Frite + Boisson",
-                            price = 300.0,
-                            painter = R.drawable.pizza
-                        )
-                    )
-                )
-            )
-        ) + mealsList,
-        foodEmoji = "\uD83C\uDF55"
-    ),
-    RestaurantData(
         id = 2L,
-        image = R.drawable.burger,
+        //image = R.drawable.burger,
+        imageUrl = "https://firebasestorage.googleapis.com/v0/b/cheicksa-81df4.appspot.com/o/cuisines%2FPetit%20Dej.jpeg?alt=media&token=652b50f9-a4ab-42f0-9171-572cfe84462e",
         name = "Burger Star",
         category = "Burger",
         deliveryFee = 30.0,
@@ -255,15 +259,12 @@ val lesRestaurants = listOf(
         mealsList = listOf(
             MealsList(
                 mealTitle = "Populaire",
-                orderScreenDatas = OrderScreenData(
-                    title = "Populaires",
-                    cards = listOf(
-                        OrderScreenCardData(
-                            title = "Good Burger",
-                            description = "Burger + Cheese + Frite + Boisson",
-                            price = 200.0,
-                            painter = R.drawable.burger
-                        )
+                cards = listOf(
+                    OrderScreenCardData(
+                        type = "Burger",
+                        title = "Good Burger",
+                        description = "Burger + Cheese + Frite + Boisson",
+                        price = 200.0,
                     )
                 )
             )
@@ -272,7 +273,8 @@ val lesRestaurants = listOf(
     ),
     RestaurantData(
         id = 3L,
-        image = R.drawable.dessert,
+        //image = R.drawable.dessert,
+        imageUrl = "https://firebasestorage.googleapis.com/v0/b/cheicksa-81df4.appspot.com/o/cuisines%2FBurger.webp?alt=media&token=e449eeac-6620-45b2-bc4c-0caad7f5b362",
         name = "Dessert King",
         category = "Dessert",
         mealsList = mealsList,
@@ -280,60 +282,17 @@ val lesRestaurants = listOf(
         minOrder = 50.0,
         foodEmoji = "\uD83C\uDF70"
     ),
-    RestaurantData(
-        id = 4L,
-        image = R.drawable.petit_dej,
-        name = "Petit Dejeuner",
-        category = "Petit Dejeuner",
-        mealsList = mealsList,
-        deliveryFee = 30.0,
-        minOrder = 50.0,
-        foodEmoji = "\uD83E\uDD50"
-    ),
-    RestaurantData(
-        id = 1L,
-        image = R.drawable.pizza,
-        name = "Pizza Bulls",
-        category = "Pizza",
-        mealsList = mealsList,
-        deliveryFee = 30.0,
-        minOrder = 50.0,
-    ),
-    RestaurantData(
-        id = 2L,
-        image = R.drawable.burger,
-        name = "Burger Star",
-        category = "Burger",
-        mealsList = mealsList,
-        deliveryFee = 30.0,
-        minOrder = 50.0,
-    ),
-    RestaurantData(
-        id = 3L,
-        image = R.drawable.dessert,
-        name = "Dessert King",
-        category = "Dessert",
-        mealsList = mealsList,
-        deliveryFee = 30.0,
-        minOrder = 50.0,
-    ),
-    RestaurantData(
-        id = 4L,
-        image = R.drawable.petit_dej,
-        name = "Petit Dejeuner",
-        category = "Petit Dejeuner",
-        mealsList = mealsList,
-        deliveryFee = 30.0,
-        minOrder = 50.0,
-    )
+
 )
 
 @Composable
 fun Restaurant(
     title: String = "Restaurant",
     restaurants: List<RestaurantData> = lesRestaurants,
-    navController: NavController
+    navController: NavController,
+    menuViewModel: MenuViewModel = viewModel(LocalContext.current as ComponentActivity)
 ) {
+    val loading by remember { menuViewModel.loading }
     Column {
         Text(
             text = title,
@@ -349,17 +308,30 @@ fun Restaurant(
                 .padding(start = 20.dp, end = 20.dp),
             horizontalArrangement = Arrangement.Center
         ) {
+            if (restaurants.isEmpty()){
+                items(3){
+                    RestaurantContainer(
+                        loading = true
+                    )
+                    Spacer(modifier = Modifier.width(15.dp))
+                }
+            }
             items(restaurants.size) {
                 val restaurant = restaurants[it]
                 RestaurantContainer(
-                    painter = painterResource(restaurant.image),
+                    image = restaurant.imageUrl,
                     name = restaurant.name,
                     category = restaurant.category,
                     mimOrder = restaurant.minOrder,
                     deliveryFee = restaurant.deliveryFee,
-                    navController = navController ,
-                    id = restaurant.id,
-                    emoji = restaurant.foodEmoji
+                    onClick = {
+                        menuViewModel.setRestaurant(restaurant)
+                        navController.navigate(RestaurantScreens.Order.route)
+                    },
+                    emoji = restaurant.foodEmoji,
+                    deliveryTime = restaurant.deliveryTime,
+                    isVerified = restaurant.isVerified,
+                    loading = loading
                 )
                 Spacer(modifier = Modifier.width(15.dp))
             }

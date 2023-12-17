@@ -23,9 +23,24 @@
     <string name="register">S’inscrire</string>
     <string name="name_surname">Nom prenom</string>
     <string name="email">Email</string>
-    <string name="phone_number">Numero de telephone</string>
+    <string name="phone_number">+223 12345678</string>
     <string name="password">Mot de passe</string>
     <string name="signin">S’indentifier</string>
     <string name="forgot_password">Mot de passe oublie?</string>
-
+    <string name="add_to_cart">Ajouter</string>
+    <string name="special_instructions">Instruction Special</string>
+    <string name="special_instructions_description">"Precisez si vous etes un ingredient ou si vous voulez evitez quoi que se soit. Merci "</string>
+    <string name="special_instructions_label">Ecrivez ici</string>
+    <string name="extra">ajouter des supplement (ex: Frite)</string>
+    <string name="comingSoon">Bientot</string>
+    <string name="task_exception_message">Mott de passe invalid (le mot de passe doit avoir au moins 6 caracteres)</string>
+    <string name="login_incorrect">Email ou mot de passe incorrect</string>
+    <string name="verify_email">Verifiez votre email</string>
+    <string name="email_verification_success">Verifiez avec succes</string>
+    <string name="login">S\'identifier</string>
+    <string name="enter_email_toreset_pass">Entrer votre email pour réinitialiser votre mot de passe</string>
+    <string name="continuez">Continuez</string>
+    <string name="change_password">Changez votre mot de passe</string>
+    <string name="email_sent">Email envoyer</string>
+    <string name="no_account">"Vous n’avez pas de compte? "</string>
 </resources>

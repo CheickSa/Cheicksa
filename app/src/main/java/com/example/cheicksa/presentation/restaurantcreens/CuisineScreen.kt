@@ -39,13 +39,6 @@ import com.example.cheicksa.presentation.lesRestaurants
 import com.example.cheicksa.ui.theme.CheicksaTheme
 import okhttp3.MediaType.Companion.toMediaType
 
-enum class FilterOptions(val text: String){
-    PRICE("Price"),
-    MIN_ORDER("Min. order"),
-    SUPER_RESTAURANT("Super Restaurant"),
-    DELIVERY_TIME("Type de livraison")
-}
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,13 +89,13 @@ fun CuisineScreen(
                         .fillMaxWidth()
                         .padding(start = 20.dp, end = 20.dp),
                     textModifier = Modifier.padding(start = 20.dp, end = 20.dp),
-                    painter = painterResource(id = restaurant.image),
+                    image = restaurant.imageUrl,
                     category = restaurant.category,
                     name = restaurant.name,
                     deliveryFee = restaurant.deliveryFee,
                     mimOrder = restaurant.minOrder,
-                    navController = navController,
-                    id = restaurant.id
+                    deliveryTime = restaurant.deliveryTime,
+                    isVerified = restaurant.isVerified,
                 )
             }
         }

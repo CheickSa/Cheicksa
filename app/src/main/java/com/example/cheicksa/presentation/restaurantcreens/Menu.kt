@@ -1,5 +1,6 @@
 package com.example.cheicksa.presentation.restaurantcreens
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,10 +15,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cheicksa.R
@@ -27,11 +33,17 @@ import com.example.cheicksa.presentation.common_ui.restaurant.RestaurantContaine
 import com.example.cheicksa.presentation.common_ui.restaurant.SearchBar
 import com.example.cheicksa.presentation.common_ui.restaurant.StoreContainer
 import com.example.cheicksa.presentation.lesRestaurants
+import com.example.cheicksa.presentation.viewmodels.MenuViewModel
 import com.example.cheicksa.ui.theme.CheicksaTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Menu(navController: NavController) {
+fun Menu(
+    navController: NavController,
+    menuViewModel: MenuViewModel = viewModel(LocalContext.current as ComponentActivity)
+) {
+    val lesRestaurant by menuViewModel.restaurants.collectAsState()
+
     Scaffold (
         topBar = {
             TopAppBar(title = {
@@ -66,7 +78,7 @@ fun Menu(navController: NavController) {
                 modifier = Modifier
                     .padding(start = 20.dp, end = 20.dp)
             ) }
-            val lesRestaurant = lesRestaurants
+
             items(lesRestaurant.size){
                 val restaurant = lesRestaurant[it]
                 RestaurantContainer(
@@ -75,13 +87,13 @@ fun Menu(navController: NavController) {
                         .fillMaxWidth()
                         .padding(start = 20.dp, end = 20.dp),
                     textModifier = Modifier.padding(start = 20.dp, end = 20.dp),
-                    navController = navController,
                     name = restaurant.name,
-                    id = restaurant.id,
                     mimOrder = restaurant.minOrder,
                     deliveryFee = restaurant.deliveryFee,
                     category = restaurant.category,
-                    painter = painterResource(id = restaurant.image)
+                    image = restaurant.imageUrl,
+                    deliveryTime = restaurant.deliveryTime,
+                    isVerified = restaurant.isVerified,
                 )
             }
         }

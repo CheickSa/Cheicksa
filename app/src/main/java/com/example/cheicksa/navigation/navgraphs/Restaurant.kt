@@ -28,32 +28,21 @@ fun NavGraphBuilder.restaurantNav(
             Menu(navController)
         }
         composable(
-            route = RestaurantScreens.Cuisine.route + "/{id}",
-            arguments = listOf(navArgument("id"){
-                type = NavType.StringType
-            })
+            route = RestaurantScreens.Cuisine.route ,
         ){
-            val cuisineCategory = it.arguments?.getString("id")
-            CuisineScreen(cuisineCategory=cuisineCategory,navController=navController)
+            CuisineScreen(navController=navController)
         }
         composable(
-            route = RestaurantScreens.Ordering.route + "/{id}",
-            arguments = listOf(navArgument("id"){
-                type = NavType.StringType
-            })
+            route = RestaurantScreens.Ordering.route ,
         ){
-            val argument = it.arguments?.getString("id")
-            Ordering(mealInfo=argument, navController=navController)
-            //TODO("change the id to long type")
+            Ordering(navController=navController)
         }
         composable(
-            route = RestaurantScreens.Order.route + "/{id}",
-            arguments = listOf(navArgument("id"){
-                type = NavType.LongType
-            })
+            route = RestaurantScreens.Order.route,
+
         ){
-            val argument = it.arguments?.getLong("id")
-            OrderScreen(navController = navController, restaurantId =argument)
+
+            OrderScreen(navController = navController,)
 
         }
     }
