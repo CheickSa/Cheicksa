@@ -1,5 +1,6 @@
 package com.example.cheicksa.presentation.restaurantcreens
 
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -41,6 +42,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +62,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -67,22 +71,27 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.cheicksa.R
 import com.example.cheicksa.model.restaurant.Extra
+import com.example.cheicksa.model.restaurant.OrderInfo
 import com.example.cheicksa.model.restaurant.OrderScreenCardData
+import com.example.cheicksa.navigation.RestaurantScreens
 import com.example.cheicksa.presentation.viewmodels.MenuViewModel
+import com.example.cheicksa.presentation.viewmodels.RoomViewModel
 import com.example.cheicksa.ui.theme.CheicksaTheme
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Ordering(
     navController: NavController,
-    menuViewModel: MenuViewModel = viewModel(LocalContext.current as ComponentActivity)
+    menuViewModel: MenuViewModel = viewModel(LocalContext.current as ComponentActivity),
+    roomViewModel: RoomViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
 ) {
     val data by menuViewModel.order.collectAsState()
+    val restaurant by menuViewModel.restaurant.collectAsState()
     var amount = remember { mutableStateOf(1) }
     var instructions by remember { mutableStateOf("") }
-    var add by remember { mutableStateOf(false) }
-    var checked by remember { mutableStateOf(false) }
-    var price by remember { mutableStateOf("0") }
+    var extraList by remember { mutableStateOf<List<Extra>>(listOf()) }
+    val scope = rememberCoroutineScope()
 
     //if (data == null) { return }
     Scaffold (
@@ -128,6 +137,15 @@ fun Ordering(
                         )
 
                     }
+                    val mealListId = restaurant.mealsList.find { it.cards.contains(data) }?.mealListCollectionIds
+                    val orderTobePlace = OrderInfo(
+                        restaurantId = restaurant.id,
+                        mealId = data.id,
+                        extras = extraList,
+                        quantity = amount.value,
+                        totalPrice = (data.price * amount.value),
+                        mealListId = mealListId ?: ""
+                    )
                     Card(
                         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.tertiary),
                         modifier = Modifier
@@ -135,7 +153,17 @@ fun Ordering(
                             .height(75.dp)
                             .padding(top = 10.dp, bottom = 10.dp, end = 10.dp, start = 10.dp)
                             .align(Alignment.CenterVertically),
-                        onClick = { add = !add }
+                        onClick = {
+                            scope.launch {
+                                roomViewModel.insertOrder(
+                                    orderTobePlace
+                                )
+                            }
+
+                            //Log.d("Ordering", "Ordering: $orders")
+                            Log.d("Ordering", "Ordering: ${orderTobePlace}")
+                        }
+
                     ) {
                         Text(
                             text = stringResource(id = R.string.add_to_cart),
@@ -169,6 +197,8 @@ fun Ordering(
                     Card(
                         modifier = Modifier
                             .fillMaxSize()
+                            .clickable { navController.navigate(RestaurantScreens.Cart.route) }
+                        //TODO: navigate to cart
                     ) {
                         val image = data.imageUlr
                         AsyncImage(
@@ -254,7 +284,14 @@ fun Ordering(
                 ) {
                     Checkbox(
                         checked = checked,
-                        onCheckedChange = { checked = it },
+                        onCheckedChange = {
+                            checked = it
+                            if (checked) {
+                                extraList += listOf(extra)
+                            } else {
+                                extraList = extraList.filter { it !in listOf(extra) }
+                            }
+                        },
                         modifier = Modifier
                             .height(16.dp)
                             .width(16.dp),

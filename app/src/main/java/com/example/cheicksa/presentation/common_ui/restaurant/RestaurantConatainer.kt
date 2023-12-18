@@ -54,14 +54,21 @@ import com.example.cheicksa.navigation.RestaurantScreens
  * on it navigates to the restaurant's order screen.
  *
  * @param modifier Modifier for the overall size of the restaurant container card. Default is 235.dp x 145.dp.
- * @param painter The [Painter] used to draw the image representing the restaurant.
+ * @param iconModifier Modifier for the icons within the restaurant container.
  * @param name The name or name of the restaurant.
  * @param category The category or type of cuisine the restaurant belongs to.
  * @param mimOrder The minimum order amount for the restaurant.
  * @param deliveryFee The delivery fee for orders from the restaurant.
  * @param textModifier Modifier for the Text composables within the restaurant container.
- * @param navController The [NavController] used for navigation when the card is clicked.
- * @param id The id passed to the order screen when navigating.
+ * @param onClick The action to perform when the restaurant container is clicked.
+ * @param deliveryTime The estimated delivery time for orders from the restaurant.
+ * @param emoji The emoji associated with the restaurant's cuisine.
+ * @param isFavorite Whether the restaurant is a favorite or not.
+ * @param onFavoriteClick The action to perform when the favorite icon is clicked.
+ * @param isVerified Whether the restaurant is verified or not.
+ * @param loading Whether the restaurant container is loading or not.
+ * @param image The image of the restaurant.
+ * @author Mamadou
  */
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,6 +77,7 @@ fun RestaurantContainer(
     modifier: Modifier = Modifier
         .width(235.dp)
         .height(145.dp),
+    iconModifier: Modifier = Modifier,
     image: String? = null,
     name: String= "",
     category: String = "",
@@ -121,7 +129,9 @@ fun RestaurantContainer(
                 Card(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
-                        .padding(5.dp,),
+                        .padding(5.dp,)
+                        .then(iconModifier)
+                    ,
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.tertiary)
                 ) {
                     Text(
@@ -141,7 +151,8 @@ fun RestaurantContainer(
                 Card(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(5.dp),
+                        .padding(5.dp)
+                        .then(iconModifier),
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.tertiary),
                     shape = CircleShape
                 ) {

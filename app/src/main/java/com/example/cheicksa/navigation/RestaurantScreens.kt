@@ -21,4 +21,8 @@ sealed class RestaurantScreens(
         name = "Order",
         route = "Order"
     )
+    data object Cart : RestaurantScreens(
+        name = "Cart",
+        route = "Cart"
+    )
 }

@@ -43,4 +43,5 @@
     <string name="change_password">Changez votre mot de passe</string>
     <string name="email_sent">Email envoyer</string>
     <string name="no_account">"Vous n’avez pas de compte? "</string>
+    <string name="show_comments">Montrer les avis</string>
 </resources>

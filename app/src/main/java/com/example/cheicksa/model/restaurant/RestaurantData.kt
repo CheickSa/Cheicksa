@@ -1,5 +1,7 @@
 package com.example.cheicksa.model.restaurant
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.firebase.Timestamp
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -60,6 +62,7 @@ data class RestaurantData(
         isBlocked = false,
     )
 }
+
 
 @Serializable
 data class Extra(

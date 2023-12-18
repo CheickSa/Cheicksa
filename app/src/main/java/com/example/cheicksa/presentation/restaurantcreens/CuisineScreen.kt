@@ -1,6 +1,7 @@
 package com.example.cheicksa.presentation.restaurantcreens
 
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,19 +24,25 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.cheicksa.model.restaurant.RestaurantData
 import com.example.cheicksa.presentation.common_ui.restaurant.RestaurantContainer
 import com.example.cheicksa.presentation.lesRestaurants
+import com.example.cheicksa.presentation.viewmodels.MenuViewModel
 import com.example.cheicksa.ui.theme.CheicksaTheme
 import okhttp3.MediaType.Companion.toMediaType
 
@@ -44,8 +51,20 @@ import okhttp3.MediaType.Companion.toMediaType
 @Composable
 fun CuisineScreen(
     cuisineCategory: String? = null,
-    navController: NavController
+    navController: NavController,
+    menuViewModel: MenuViewModel = viewModel(LocalContext.current as ComponentActivity)
 ) {
+    val restaurantsListVm by remember { menuViewModel.restaurants }.collectAsState()
+    val cuisine by menuViewModel.cuisine.collectAsState()
+
+    var restaurants by remember { mutableStateOf(restaurantsListVm
+        .filter { it.category == cuisine.title })
+    }
+    var needSuperRestaurant by remember { mutableStateOf(false) }
+    val needMinOrder by remember { mutableStateOf(false) }
+    val needPrice by remember { mutableStateOf(false) }
+    val needDelivery by remember { mutableStateOf(false) }
+
     Scaffold (
         topBar = {
             TopAppBar(title = {
@@ -62,7 +81,17 @@ fun CuisineScreen(
                         filter = "Min. order"
                     ) }
                     item { Filters(
-                        filter = "Super Restaurant"
+                        filter = "Super Restaurant",
+                        onClick = {
+                            val newList = restaurantsListVm.filter { it.isVerified && it.category == cuisine.title }
+                            restaurants = if (restaurants == newList) {
+                                needSuperRestaurant=false
+                                restaurantsListVm.filter { it.category == cuisine.title }
+                            } else {
+                                needSuperRestaurant=true
+                                newList
+                            }
+                        }
                     ) }
                     item { Filters(
                         filter = "Type de livraison"
@@ -73,14 +102,14 @@ fun CuisineScreen(
                 scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
             )
         }
-    ){
+    ){ paddingValues ->
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier
                 .padding(bottom = 20.dp, top = 20.dp),
-            contentPadding = it
+            contentPadding = paddingValues
         ){
-            val restaurants = lesRestaurants.filter { it.category == cuisineCategory }
+            //val restaurants = restaurantsList.filter { it.category == cuisine.title }
             items(restaurants.size){
                 val restaurant = restaurants[it]
                 RestaurantContainer(
@@ -88,6 +117,7 @@ fun CuisineScreen(
                         .height(175.dp)
                         .fillMaxWidth()
                         .padding(start = 20.dp, end = 20.dp),
+                    iconModifier = Modifier.padding(start = 20.dp, end = 20.dp),
                     textModifier = Modifier.padding(start = 20.dp, end = 20.dp),
                     image = restaurant.imageUrl,
                     category = restaurant.category,
@@ -121,7 +151,7 @@ fun Filters(
                 .height(35.dp),
             onClick = {
                 openContent = !openContent
-                onClick
+                onClick.invoke()
             },
             colors = CardDefaults.cardColors(Color.Unspecified),
 

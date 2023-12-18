@@ -2,13 +2,12 @@ package com.example.cheicksa.navigation.navgraphs
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.cheicksa.navigation.NavConstants
 import com.example.cheicksa.navigation.RestaurantScreens
 import com.example.cheicksa.navigation.StoreScreens
+import com.example.cheicksa.presentation.restaurantcreens.Cart
 import com.example.cheicksa.presentation.restaurantcreens.CuisineScreen
 import com.example.cheicksa.presentation.restaurantcreens.Menu
 import com.example.cheicksa.presentation.restaurantcreens.OrderScreen
@@ -39,11 +38,13 @@ fun NavGraphBuilder.restaurantNav(
         }
         composable(
             route = RestaurantScreens.Order.route,
-
         ){
-
             OrderScreen(navController = navController,)
-
+        }
+        composable(
+            route = RestaurantScreens.Cart.route ,
+        ){
+            Cart(navController = navController,)
         }
     }
     //TODO("documenting the fuction")

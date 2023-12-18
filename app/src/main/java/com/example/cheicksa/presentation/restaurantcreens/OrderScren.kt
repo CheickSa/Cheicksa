@@ -3,9 +3,11 @@ package com.example.cheicksa.presentation.restaurantcreens
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,8 +15,12 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
@@ -110,13 +116,21 @@ fun OrderScreen(
         mutableStateOf(0)
     }
     val restaurant = remember { menuViewModel.restaurant.value }
+
+    var showComments by remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
             Column (
                 modifier = Modifier
                     .height(if (state.isScrolled) 0.dp else 270.dp)
             ){
-                RestaurantInfo(restaurant = restaurant)
+                RestaurantInfo(
+                    restaurant = restaurant,
+                    onStarClick = {
+                        showComments = !showComments
+                    },
+                    navController = navController
+                )
                 Spacer(modifier = Modifier.height(15.dp))
                 DiscountBar()
             }
@@ -151,7 +165,8 @@ fun OrderScreen(
                     OrderCards(
                         data=restaurants[mealId],
                         navController = navController,
-                        menuViewModel = menuViewModel
+                        menuViewModel = menuViewModel,
+                        showcomments = showComments
                     )
                 }
 
@@ -174,7 +189,7 @@ fun Meals(
             color = !color
             onClick.invoke()
         },
-        shape = RoundedCornerShape(15.dp),
+        shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(Color.Unspecified)
     ) {
         Text(
@@ -193,7 +208,8 @@ fun Meals(
 fun OrderCards(
     data: MealsList,
     navController: NavController,
-    menuViewModel: MenuViewModel
+    menuViewModel: MenuViewModel,
+    showcomments: Boolean = false
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -216,37 +232,60 @@ fun OrderCards(
                 foodName = it.title,
                 ingredient = it.description,
                 price = it.price,
-                image = it.imageUlr
+                image = it.imageUlr,
+                showcomments = showcomments
             ) {
                 menuViewModel.setOrder(it)
                 navController.navigate(RestaurantScreens.Ordering.route)
             }
+            //TODO("add comment like and unlike icon to the card Afer someOne ordered it")
         }
     }
 }
 
 @Composable
 fun RestaurantInfo(
-    restaurant: RestaurantData
+    restaurant: RestaurantData,
+    onStarClick : ()->Unit = {},
+    navController: NavController
 ) {
     Column (
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 30.dp, end = 30.dp),
+            .padding(start = 30.dp, end = 30.dp, top = 10.dp),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.spacedBy(15.dp)
     ){
         // restaurantName
-        Text(
-            text = restaurant.name,
-            fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
-            fontSize = MaterialTheme.typography.titleLarge.fontSize,
-            color = MaterialTheme.colorScheme.primary,
+        Row(
             modifier = Modifier
-        )
+                .fillMaxWidth()
+                .height(30.dp),
+            horizontalArrangement = Arrangement.spacedBy(-5.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier
+                    .offset(x = (-13.8).dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = ""
+                )
+            }
+            Text(
+                text = restaurant.name,
+                fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+
+            )
+        }
         // delivery fee
         RestaurantInfoContainer(
-            color = Color.Green,
+            color = if (restaurant.deliveryFee==0.0) Color.Green else Color.Black,
             painter = painterResource(id = R.drawable.time),
             details = if (restaurant.deliveryFee==0.0) stringResource(R.string.free_delivery) else
                 stringResource(id = R.string.delivery_fee,restaurant.deliveryFee)+
@@ -256,7 +295,7 @@ fun RestaurantInfo(
         )
         // delivery time
         RestaurantInfoContainer(
-            painter = painterResource(id = R.drawable.time),
+            painter = painterResource(id = R.drawable.delivery_dining),
             details = stringResource(R.string.delivery_time, restaurant.deliveryTime),
             additionalDetail = "",
             onClick = {}
@@ -272,9 +311,9 @@ fun RestaurantInfo(
         // rate
         RestaurantInfoContainer(
             painter = painterResource(id = R.drawable.star),
-            details = restaurant.rate.toString(),
-            additionalDetail = stringResource(R.string.rater_count,restaurant.raterCount),
-            onClick = {}
+            details = stringResource(R.string.show_comments),
+            additionalDetail = "",
+            onClick = onStarClick
         )
     }
 }

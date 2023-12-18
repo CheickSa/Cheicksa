@@ -86,6 +86,7 @@ fun Menu(
                         .height(175.dp)
                         .fillMaxWidth()
                         .padding(start = 20.dp, end = 20.dp),
+                    iconModifier = Modifier.padding(start = 20.dp, end = 20.dp),
                     textModifier = Modifier.padding(start = 20.dp, end = 20.dp),
                     name = restaurant.name,
                     mimOrder = restaurant.minOrder,

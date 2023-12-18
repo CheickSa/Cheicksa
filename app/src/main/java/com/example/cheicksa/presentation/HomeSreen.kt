@@ -234,7 +234,10 @@ fun Cuisines(
                 CuisineContainer(
                     imageUrl = cuisine.imageUrl,
                     title = cuisine.title,
-                    onClick = { navController.navigate(RestaurantScreens.Cuisine.route) },
+                    onClick = {
+                        menuViewModel.setCuisine(cuisine)
+                        navController.navigate(RestaurantScreens.Cuisine.route)
+                    },
                     loading = cuisineLoding
                 )
                 Log.d("a", cuisineLoding.toString())
