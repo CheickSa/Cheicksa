@@ -65,7 +65,6 @@ fun HomeScreen(
     ){
         item { SearchBar(
             onClick = {
-
                 navController.navigate(GptScreens.Gpt.route)
             },
             text = stringResource(R.string.search_bar_text)

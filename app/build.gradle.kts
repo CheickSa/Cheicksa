@@ -72,6 +72,8 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
+    implementation("com.google.accompanist:accompanist-permissions:0.33.2-alpha")
+
     implementation("io.coil-kt:coil-compose:2.5.0")
 
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
@@ -106,6 +108,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-storage:20.3.0")
     implementation("com.google.firebase:firebase-auth:22.3.0")
+    implementation("com.google.firebase:firebase-messaging:23.4.0")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     //implementation("com.google.firebase:firebase-analytics")
 

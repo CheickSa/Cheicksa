@@ -2,6 +2,7 @@ package com.example.cheicksa
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,6 +38,45 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("MainActivity", "onPause: ")
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("MainActivity", "onDestroy: ")
+    }
+    override fun onResume() {
+        super.onResume()
+        Log.d("MainActivity", "onResume: ")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("MainActivity", "onStop: ")
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d("MainActivity", "onStart: ")
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        Log.d("MainActivity", "onLowMemory: ")
+    }
+
+    override fun onUserInteraction() {
+        super.onUserInteraction()
+        Log.d("MainActivity", "onUserInteraction: ")
+    }
+
+
+
 }
 
 @Composable
