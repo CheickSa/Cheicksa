@@ -1,6 +1,14 @@
 package com.example.cheicksa.presentation.gpt
 
+import android.os.Build
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.annotation.RequiresApi
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -8,14 +16,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,14 +37,25 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,121 +64,240 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.asFlow
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cheicksa.R
+import com.example.cheicksa.model.gpt.Chat
 import com.example.cheicksa.model.gpt.response.ResponseObject
 import com.example.cheicksa.presentation.common_ui.restaurant.RestaurantContainer
 import com.example.cheicksa.presentation.viewmodels.GptViewModel
+import com.example.cheicksa.presentation.viewmodels.RoomViewModel
 import com.example.cheicksa.ui.theme.CheicksaTheme
+import com.example.cheicksa.ui.theme.montSarrat
 import com.example.cheicksa.ui.theme.shape
+import com.maxkeppeker.sheets.core.views.Grid
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(navController: NavController) {
-    val chatViewModel = hiltViewModel<GptViewModel>()
+    val chatViewModel = hiltViewModel<GptViewModel>(LocalContext.current as ComponentActivity)
+    val roomViewModel = hiltViewModel<RoomViewModel>()
+
     val chat by chatViewModel.chats
     val thinking by chatViewModel.thinking
     val response by chatViewModel.response.collectAsState()
     val toolData by chatViewModel.toolData.collectAsState()
     val restaurants by chatViewModel.restaurantsList.collectAsState()
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-
-    ) {
-
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 80.dp)
-        ) {
-            items(chat.chunked(2).size) { index ->
-                val message = chat.chunked(2)[index]
-
-                Box {
-                    Column {
-                        ChatContainer(
-                            text = message[0],
-                            isAssistant = false
+    var isSearch by remember { mutableStateOf(false) }
+    val state = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    Scaffold (
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Search",
+                        style = TextStyle(
+                            fontSize = 20.sp,
+                            lineHeight = 24.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        fontFamily = montSarrat
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = " "
                         )
-
-                        if (message.size == 2 && message[1]!="null") {
-                            var textToAnimate by remember { mutableStateOf("") }
-                            val text = message[1]
-                            LaunchedEffect(text) {
-                                text.toCharArray().forEach {
-                                    textToAnimate += it
-                                    delay(10)
-                                }
-                            }
-                            ChatContainer(
-                                text = textToAnimate,
-                                isAssistant = true
+                    }
+                },
+                actions = {
+                    Button(
+                        onClick = { isSearch = !isSearch },
+                        modifier = Modifier.padding(end = 5.dp),
+                        colors = if (isSearch) ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary,)
+                        else ButtonDefaults.buttonColors(Color.Unspecified),
+                        contentPadding = PaddingValues(10.dp),
+                    ) {
+                        if (!isSearch){
+                            Icon(
+                                imageVector = Icons.Outlined.Search,
+                                contentDescription = "",
+                                modifier = Modifier
+                                    .padding(5.dp)
+                                    .size(25.dp),
+                                tint = Color.Unspecified
                             )
-
+                        }else {
+                            Text(
+                                text = "Assintant IA",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = montSarrat,
+                                color = Color.Black
+                            )
                         }
-
                     }
                 }
-            }
-            items(restaurants.size ?: 0) {
-                val restaurantList = restaurants[it]
-
-                restaurantList?.forEach {
-                    val restaurant = it
-                    if (restaurant != null) {
-                        RestaurantContainer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(225.dp)
-                                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-                            textModifier = Modifier.padding(start = 16.dp),
-                            image = restaurant.imageUrl,
-                            name = restaurant.name,
-                            category = restaurant.category,
-                            mimOrder = restaurant.minOrder,
-                            deliveryFee = restaurant.deliveryFee,
-                            deliveryTime = restaurant.deliveryTime,
-                            isVerified = restaurant.isVerified,
-                        )
-                    }
-                }
-
-            }
-        }
-        if (thinking){
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .align(Alignment.Center)
             )
         }
-        MessageField(
-            navController = navController,
-            onAddClick = {},
-            onSendClick = {
-                chatViewModel.setRequest(it)
-            },
-            onMessageChange = {},
-            onMicroClick = {},
-            unEnbled = thinking
-        )
+    ){
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+        ) {
+
+            LazyColumn(
+                state = state,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 80.dp),
+            ) {
+                item {
+                    Column (
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        Card(
+                            modifier = Modifier
+                                .size(150.dp),
+                            colors = CardDefaults.cardColors(Color.Unspecified),
+                            border = null
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.bro),
+                                contentDescription = "",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                            )
+                        }
+                        Text(
+                            text = "Hello, I'm Cheicksa IA",
+                            style = TextStyle(
+                                fontSize = 20.sp,
+                                lineHeight = 24.sp,
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            fontFamily = montSarrat
+                        )
+                        Text(
+                            text = "How can I help you?",
+                            style = TextStyle(
+                                fontSize = 15.sp,
+                                lineHeight = 20.sp,
+                                color = Color.Black,
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            fontFamily = montSarrat
+                        )
+                    }
+                }
+                items(chat.chunked(2).size) { index ->
+                    val message = chat.chunked(2)[index]
+
+                    Box {
+                        Column {
+                            ChatContainer(
+                                text = message[0].message,
+                                isAssistant = false
+                            )
+
+                            if (message.size == 2 ) {
+                                //var textToAnimate by remember { mutableStateOf("") }
+                                val text = if (message[1].message=="null") "\uD83D\uDC47\uD83C\uDFFE" else message[1].message
+                                ChatContainer(
+                                    text = text,
+                                    isAssistant = true
+                                )
+
+                                if (message[1].meals != null){
+                                }
+                                if (message[1].restaurantData != null) {
+                                    val restaurants = message[1].restaurantData
+                                    restaurants?.forEach {
+                                        val restaurant = it
+                                        RestaurantContainer(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(225.dp)
+                                                .padding(
+                                                    start = 16.dp,
+                                                    end = 16.dp,
+                                                    top = 16.dp
+                                                ),
+                                            textModifier = Modifier.padding(start = 16.dp),
+                                            image = restaurant.imageUrl,
+                                            name = restaurant.name,
+                                            category = restaurant.category,
+                                            mimOrder = restaurant.minOrder,
+                                            deliveryFee = restaurant.deliveryFee,
+                                            deliveryTime = restaurant.deliveryTime,
+                                            isVerified = restaurant.isVerified,
+                                        )
+                                    }
+                                }
+                                scope.launch {
+                                    state.animateScrollToItem(chat.size)
+                                }
+
+                            }
+
+                        }
+                    }
+                }
+            }
+            if (thinking){
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                )
+            }
+            MessageField(
+                navController = navController,
+                onAddClick = {},
+                onSendClick = {
+                    chatViewModel.setRequest(it)
+                    scope.launch {
+                        state.animateScrollToItem(chat.size)
+                    }
+                },
+                onMessageChange = {},
+                onMicroClick = {},
+                unEnbled = thinking
+            )
+        }
     }
+
 }
 
 
@@ -256,14 +398,14 @@ fun BoxScope.MessageField(
             Icons.Default.Send,
             contentDescription = null,
             modifier = Modifier
+                .clip(shape = CircleShape)
                 .rotate(-45f)
                 .weight(1f)
-                .clickable(
-                    enabled = text.isNotEmpty() || unEnbled,
-                ) {
+                .clickable(enabled = text.isNotEmpty() || unEnbled,) {
                     onSendClick(text)
                     text = ""
                 }
+                .background(Color.Unspecified, shape = CircleShape)
         )
     }
 
@@ -280,29 +422,19 @@ fun ChatContainer(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.Unspecified)
-            .padding(end = 10.dp)
             .padding(16.dp),
-        horizontalArrangement = Arrangement.Start,
+        horizontalArrangement = if(isAssistant) Arrangement.End else Arrangement.Start,
         verticalAlignment = Alignment.Top
     ){
-        Card(
-            modifier = Modifier
-                .height(34.dp)
-                .width(34.dp),
-            shape = CircleShape,
-            colors = CardDefaults.cardColors(Color.Unspecified),
-            border = BorderStroke(1.dp, Color.Black)
-        ) {
-            if (isAssistant){
-                Icon(
-                    painter = painterResource(id = R.drawable.bro),
-                    contentDescription = "",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(5.dp),
-                    tint = Color.Unspecified
-                )
-            }else {
+        if (!isAssistant){
+            Card(
+                modifier = Modifier
+                    .height(34.dp)
+                    .width(34.dp),
+                shape = CircleShape,
+                colors = CardDefaults.cardColors(Color.Unspecified),
+                border = BorderStroke(1.dp, Color.Black)
+            ) {
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = "",
@@ -311,34 +443,92 @@ fun ChatContainer(
                         .padding(5.dp)
                 )
             }
-        }
-        Card (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 10.dp, end = 15.dp),
-            shape = RoundedCornerShape(
-                topStart = 0.dp,
-                bottomEnd = 15.dp,
-                bottomStart = 15.dp,
-                topEnd = 15.dp
-            ),
-            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondary),
-            border = BorderStroke(1.dp, Color.Black)
-
-        ){
-            SelectionContainer {
-                Text(
-                    text = text,
-                    modifier = Modifier
-                        .padding(10.dp),
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        lineHeight = 20.sp,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Black
+            Card (
+                modifier = Modifier
+                    .widthIn(max = Dp.Infinity)
+                    .padding(start = 10.dp, end = 40.dp),
+                shape = RoundedCornerShape(
+                    topStart = 0.dp,
+                    bottomEnd = 15.dp,
+                    bottomStart = 15.dp,
+                    topEnd = 15.dp
+                ),
+                colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondary),
+            ){
+                SelectionContainer {
+                    Text(
+                        text = text,
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .animateContentSize(
+                                animationSpec = tween(
+                                    durationMillis = 600,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ),
+                        style = TextStyle(
+                            fontSize = 15.sp,
+                            lineHeight = 20.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        fontFamily = montSarrat
                     )
+                }
+            }
+        }else {
+            Card(
+                modifier = Modifier
+                    .padding(start = 40.dp, end = 15.dp)
+                    .weight(7f, fill = false)
+                ,
+                shape = RoundedCornerShape(
+                    topStart = 15.dp,
+                    bottomEnd = 15.dp,
+                    bottomStart = 15.dp,
+                    topEnd = 0.dp
+                ),
+                colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondary),
+            ) {
+                SelectionContainer {
+                    Text(
+                        text = text,
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .animateContentSize(
+                                animationSpec = tween(
+                                    durationMillis = 600,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ),
+                        style = TextStyle(
+                            fontSize = 15.sp,
+                            lineHeight = 20.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        fontFamily = montSarrat
+                    )
+                }
+            }
+            Card(
+                modifier = Modifier
+                    .height(34.dp)
+                    .width(34.dp),
+                shape = CircleShape,
+                colors = CardDefaults.cardColors(Color.Unspecified),
+                border = BorderStroke(1.dp, Color.Black)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.bro),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(5.dp),
+                    tint = Color.Unspecified
                 )
             }
+
         }
     }
 }
@@ -356,6 +546,7 @@ private fun _ChatContainer() {
 
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun KeyboardAwareTextFieldPreview() {

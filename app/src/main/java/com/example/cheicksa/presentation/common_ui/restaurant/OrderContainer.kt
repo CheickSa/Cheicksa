@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -23,7 +24,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -59,6 +65,7 @@ import coil.compose.AsyncImage
 import com.example.cheicksa.R
 import com.example.cheicksa.model.restaurant.Comments
 import com.example.cheicksa.presentation.viewmodels.MenuViewModel
+import com.example.cheicksa.ui.theme.montSarrat
 import org.w3c.dom.Comment
 
 /**
@@ -119,14 +126,17 @@ fun OrderContainer(
                 ) {
                     Column(
                         modifier = Modifier
-                            .padding(start = 10.dp, end = 10.dp, top = 10.dp)
+                            .padding(start = 10.dp, end = 10.dp, top = 10.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
                             text = foodName,
                             fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
                             fontSize = MaterialTheme.typography.titleLarge.fontSize,
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
+                            modifier = Modifier,
+                            fontFamily = montSarrat
+
                         )
                         Text(
                             text = ingredient,
@@ -136,28 +146,41 @@ fun OrderContainer(
                             modifier = Modifier.width(200.dp),
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 2,
-                            lineHeight = 1.2.em
+                            lineHeight = 1.2.em,
+                            fontFamily = montSarrat
+
                         )
                         Text(
                             text = price.toString() + " " + stringResource(id = R.string.devise) + " ",
                             fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
                             fontSize = MaterialTheme.typography.titleMedium.fontSize,
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
+                            modifier = Modifier,
+                            fontFamily = montSarrat
                         )
                     }
-                    if (image == null) {
-                        Image(
-                            painter = painterResource(id = R.drawable.cheeseburger),
-                            contentDescription = "",
+                    if (image == null || !(image as String).startsWith("http")) {
+                        Button(
+                            onClick = onClick,
+                            elevation =  ButtonDefaults.buttonElevation(
+                                5.dp
+                            ),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary
+                            ),
+                            shape = CircleShape,
                             modifier = Modifier
-                                .width(65.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .fillMaxHeight()
-                                .padding(top = 10.dp, bottom = 10.dp, end = 10.dp),
-                            contentScale = ContentScale.Crop,
-                            alignment = Alignment.Center
-                        )
+                                .size(50.dp)
+                                .padding(top = 15.dp, bottom = 0.dp, end = 15.dp)
+                                .align(Alignment.CenterVertically),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Add,
+                                contentDescription ="",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     } else {
                         AsyncImage(
                             model = image,
@@ -173,18 +196,29 @@ fun OrderContainer(
                     }
                 }
             }
-            IconButton(
-                onClick = onClick,
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.vector_plus),
-                    contentDescription = "",
+            if (image != null && (image as String).startsWith("http")) {
+                Button(
+                    onClick = onClick,
+                    elevation = ButtonDefaults.buttonElevation(
+                        5.dp
+                    ),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary
+                    ),
+                    shape = CircleShape,
                     modifier = Modifier
+                        .size(40.dp)
+                        .padding(top = 10.dp, bottom = 0.dp, end = 10.dp)
                         .align(Alignment.BottomEnd)
-                        .offset(y = (-3).dp, x = (-1).dp),
-                    tint = Color.Unspecified
-                )
+                        .offset(y = (-25).dp),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
         AnimatedVisibility(

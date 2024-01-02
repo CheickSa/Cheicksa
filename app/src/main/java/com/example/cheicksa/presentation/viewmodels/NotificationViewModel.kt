@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.ViewModel
 import com.example.cheicksa.MainActivity
 import com.example.cheicksa.R
+import kotlin.random.Random
 
 val CHANNEL_ID = "Main Channel ID"
 
@@ -49,7 +50,7 @@ class NotificationViewModel : ViewModel() {
         message: String = "Your order is ready",
         context: Context,
         action: NotificationAction = NotificationAction.CREATE,
-        uniqueId: Int = 1,
+        uniqueId: Int = Random.nextInt(),
         icon: Icon? = null
     ){
         val notificationManager = getSystemService(context,android.app.NotificationManager::class.java) as NotificationManager
@@ -69,7 +70,6 @@ class NotificationViewModel : ViewModel() {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.money)
             .setLargeIcon(icon)
-
             .setContentTitle(title)
             .setContentText(message)
             .setContentIntent(pendingIntent)

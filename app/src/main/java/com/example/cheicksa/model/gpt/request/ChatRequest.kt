@@ -7,11 +7,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ChatRequest(
     @SerialName("model")
-    val model: String,
+    val model: String = "",
     @SerialName("messages")
-    val messages: List<Message>,
+    val messages: List<Message> = listOf(),
     @SerialName("tools")
-    val tools: List<Tool>,
+    val tools: List<Tool> = listOf(),
     @SerialName("tool_choice")
-    val tool_choice: String
+    val tool_choice: String = "",
 )

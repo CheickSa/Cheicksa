@@ -14,9 +14,14 @@ data class Properties(
     val foodName: FoodName,
     val foodCategory: FoodCategory,
     val foodQuantity: FoodQuantity,
-    val foodPrice: FoodPrice
+    val mealId: MealId
 )
 
+@Serializable
+data class MealId(
+    val type: String = "String",
+    val description: String
+)
 @Serializable
 data class RestaurantName(
     val type: String = "String",
@@ -36,9 +41,4 @@ data class FoodCategory(
 data class FoodQuantity(
     val type: String = "String",
     val description: String
-)
-@Serializable
-data class FoodPrice(
-    val type: String = "String",
-    val `enum`: List<String>
 )

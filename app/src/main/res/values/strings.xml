@@ -12,8 +12,8 @@
     <string name="min_order">min. </string>
     <string name="devise_sign"><b>₺</b></string>
     <string name="free_delivery">Livraison gratuite</string>
-    <string name="delivery_time">Livraison %.2f min</string>
-    <string name="mim_order">"min. <b>%.2f</b> "</string>
+    <string name="delivery_time">Livraison %.2f minutes </string>
+    <string name="mim_order">" minimun. <b>%.2f</b> "</string>
     <string name="rater_count">%d+ rating</string>
     <string name="bussiness">Choissisez un domaine</string>
     <string name="choose_cuisinr_category">Choissisez les category</string>

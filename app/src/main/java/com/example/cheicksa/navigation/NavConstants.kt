@@ -11,4 +11,6 @@ object NavConstants {
     const val BOUTIQUE_ROUTE = "BOUTIQUE_ROUTE"
 
     const val GPT_SCREEN_ROUTE = "GPT_SCREEN_ROUTE"
+
+    const val RESTAURANT_NAV_BAR = "RESTAURANT_NAV_BAR"
 }

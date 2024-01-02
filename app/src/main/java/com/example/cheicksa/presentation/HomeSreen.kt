@@ -14,10 +14,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -35,7 +40,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cheicksa.R
 import com.example.cheicksa.model.restaurant.Club
-import com.example.cheicksa.model.restaurant.Cuisine
 import com.example.cheicksa.model.restaurant.MealsList
 import com.example.cheicksa.model.restaurant.OrderScreenCardData
 import com.example.cheicksa.model.restaurant.RestaurantData
@@ -44,12 +48,14 @@ import com.example.cheicksa.navigation.RestaurantScreens
 import com.example.cheicksa.navigation.StoreScreens
 import com.example.cheicksa.presentation.common_ui.restaurant.CuisineContainer
 import com.example.cheicksa.presentation.common_ui.restaurant.RestaurantContainer
-import com.example.cheicksa.presentation.common_ui.restaurant.SearchBar
+import com.example.cheicksa.presentation.common_ui.restaurant.SearchBarContainer
 import com.example.cheicksa.presentation.common_ui.restaurant.StoreContainer
 import com.example.cheicksa.presentation.restaurantcreens.mealsList
 import com.example.cheicksa.presentation.viewmodels.MenuViewModel
 import com.example.cheicksa.ui.theme.CheicksaTheme
+import com.example.cheicksa.ui.theme.montSarrat
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navController: NavController,
@@ -57,27 +63,50 @@ fun HomeScreen(
 ) {
     val restaurants by menuViewModel.restaurants.collectAsState()
 
-
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-        modifier = Modifier
-            .padding(bottom = 20.dp)
-    ){
-        item { SearchBar(
-            onClick = {
-                navController.navigate(GptScreens.Gpt.route)
+    Scaffold (
+        topBar = {
+            TopAppBar(title = {
+                SearchBarContainer(
+                    onClick = {
+                        navController.navigate(GptScreens.Gpt.route)
+                    },
+                    text = stringResource(R.string.search_bar_text),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp)
+                        .padding(start = 20.dp, end = 20.dp)
+                )
             },
-            text = stringResource(R.string.search_bar_text)
-        ) }
-        item { Stores(navController) }
-        item { DiscountBar() }
-        item { Cuisines(navController=navController) }
-        item { Restaurant(
-            navController=navController,
-            restaurants = restaurants
-        ) }
-        item { Restaurant(navController=navController) }
+                scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor= Color.White,
+                    scrolledContainerColor = Color.Transparent
+                ),
+
+            )
+        }
+
+    ) {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            modifier = Modifier
+                .padding(bottom = 20.dp),
+            contentPadding = it
+        ){
+            item { Stores(navController) }
+            item { DiscountBar() }
+            item { Cuisines(navController=navController) }
+            item { Restaurant(
+                navController=navController,
+                restaurants = restaurants
+            ) }
+            item { Restaurant(
+                navController=navController
+            ) }
+        }
     }
+
+
 }
 
 
@@ -93,12 +122,14 @@ fun Stores(navController: NavController) {
         Row (
             modifier = Modifier
                 .padding(20.dp),
-            horizontalArrangement = Arrangement.Center,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ){
             Column(
                 modifier = Modifier
                     .weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 StoreContainer(
                     width = 165.dp,
@@ -111,7 +142,6 @@ fun Stores(navController: NavController) {
                     painter = painterResource(id = R.drawable.sup_market),
                     onClick = {navController.navigate(StoreScreens.SuperMarche.route)},
                 )
-                Spacer(modifier = Modifier.height(10.dp))
                 StoreContainer(
                     width = 165.dp,
                     height = 126.dp,
@@ -124,10 +154,11 @@ fun Stores(navController: NavController) {
                     onClick = {navController.navigate(StoreScreens.Boutique.route)}
                 )
             }
-            Spacer(modifier = Modifier.width(5.dp))
             Column (
                 modifier = Modifier
-                    .weight(1f)
+                    .weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ){
                 StoreContainer(
                     width = 165.dp,
@@ -141,7 +172,6 @@ fun Stores(navController: NavController) {
                     title =  stringResource(id = R.string.restaurant),
                     onClick = {navController.navigate(StoreScreens.Restaurant.route)}
                 )
-                Spacer(modifier = Modifier.height(10.dp))
                 StoreContainer(
                     width = 165.dp,
                     height = 75.dp,
@@ -191,32 +221,41 @@ fun DiscountBar(
     
 }
 
-
-
-val cuisinesList = listOf(
-    Cuisine(title = "Pizza", ),
-    Cuisine(title = "Burger", ),
-    Cuisine(title = "Dessert", ),
-    Cuisine(title = "Petit Dejeuner",),
-)
-
 @Composable
 fun Cuisines(
     navController: NavController,
     menuViewModel: MenuViewModel = viewModel(LocalContext.current as ComponentActivity)
-
 ) {
     val cuisines by menuViewModel.cuisines.collectAsState()
     val cuisineLoding by remember { menuViewModel.cuisineLoading }
 
     Column {
-        Text(
-            text = stringResource(id = R.string.cuisines),
-            fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
-            fontSize = MaterialTheme.typography.titleLarge.fontSize,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 20.dp, end = 20.dp)
-        )
+        Row (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = stringResource(id = R.string.cuisines),
+                fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                color = MaterialTheme.colorScheme.primary,
+                fontFamily = montSarrat
+            )
+            /*
+            Icon(
+                imageVector = Icons.Filled.ArrowForward,
+                contentDescription = "",
+                modifier = Modifier
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.8f), CircleShape)
+                    .clickable {
+                    //TODO: navigate to cuisines screen
+                },
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+            )*/
+        }
         Spacer(modifier = Modifier.height(15.dp))
         LazyRow(
             modifier = Modifier.padding(start = 20.dp, end = 20.dp),
@@ -251,7 +290,7 @@ fun Cuisines(
 
 val lesRestaurants = listOf(
     RestaurantData(
-        id = 2L,
+        id = "",
         //image = R.drawable.burger,
         imageUrl = "https://firebasestorage.googleapis.com/v0/b/cheicksa-81df4.appspot.com/o/cuisines%2FPetit%20Dej.jpeg?alt=media&token=652b50f9-a4ab-42f0-9171-572cfe84462e",
         name = "Burger Star",
@@ -274,7 +313,7 @@ val lesRestaurants = listOf(
         foodEmoji = "\uD83C\uDF54"
     ),
     RestaurantData(
-        id = 3L,
+        id = "",
         //image = R.drawable.dessert,
         imageUrl = "https://firebasestorage.googleapis.com/v0/b/cheicksa-81df4.appspot.com/o/cuisines%2FBurger.webp?alt=media&token=e449eeac-6620-45b2-bc4c-0caad7f5b362",
         name = "Dessert King",
@@ -296,14 +335,33 @@ fun Restaurant(
 ) {
     val loading by remember { menuViewModel.loading }
     Column {
-        Text(
-            text = title,
-            fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
-            fontSize = MaterialTheme.typography.titleLarge.fontSize,
-            color = MaterialTheme.colorScheme.primary,
+        Row (
             modifier = Modifier
-                .padding(start = 20.dp, end = 20.dp)
-        )
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ){
+            Text(
+                text = title,
+                fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                color = MaterialTheme.colorScheme.primary,
+                fontFamily = montSarrat
+
+            )
+            /*
+            Icon(
+                imageVector = Icons.Filled.ArrowForward,
+                contentDescription = "",
+                modifier = Modifier
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.8f), CircleShape)
+                    .clickable {
+                    //TODO: navigate to restaurants screen
+                },
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+            )*/
+        }
         Spacer(modifier = Modifier.height(15.dp))
         LazyRow(
             modifier = Modifier
@@ -333,7 +391,8 @@ fun Restaurant(
                     emoji = restaurant.foodEmoji,
                     deliveryTime = restaurant.deliveryTime,
                     isVerified = restaurant.isVerified,
-                    loading = loading
+                    loading = loading,
+                    //textModifier =
                 )
                 Spacer(modifier = Modifier.width(15.dp))
             }

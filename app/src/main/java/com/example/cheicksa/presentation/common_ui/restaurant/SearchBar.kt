@@ -1,13 +1,14 @@
 package com.example.cheicksa.presentation.common_ui.restaurant
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -22,15 +23,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.cheicksa.R
 import com.example.cheicksa.ui.theme.CheicksaTheme
+import com.example.cheicksa.ui.theme.montSarrat
 import kotlinx.coroutines.delay
 
 /**
- * [SearchBar] is the search bar composable function
+ * [SearchBarContainer] is the search bar composable function
  * @param height the optional height parameter is set to 44dp by default
  * @param color the optional parameter for the color of the bar is set to secondary of the color sheme
  * @param onClick what do you except the search bar to do when user click on it
@@ -38,9 +41,10 @@ import kotlinx.coroutines.delay
  * @param description set to empty text by default fill it for text testing purpose
  */
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar(
-    height: Dp = 44.dp,
+fun SearchBarContainer(
+    modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.secondary,
     onClick: ()-> Unit,
     text: String,
@@ -62,13 +66,10 @@ fun SearchBar(
         verticalAlignment = Alignment.CenterVertically
     ){
         Card (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, top = 20.dp)
-                .height(height)
-                .clickable(onClick = onClick),
+            modifier = modifier,
             shape = MaterialTheme.shapes.large,
-            colors = CardDefaults.cardColors(color)
+            colors = CardDefaults.cardColors(color),
+            onClick = onClick
         ){
             Row (
                 modifier= Modifier
@@ -87,7 +88,9 @@ fun SearchBar(
                     text = textToAnimate,
                     fontWeight = MaterialTheme.typography.titleMedium.fontWeight,
                     fontSize = MaterialTheme.typography.titleMedium.fontSize,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
@@ -99,6 +102,6 @@ fun SearchBar(
 @Composable
 fun SearchBar_() {
     CheicksaTheme {
-        SearchBar(onClick = { /*TODO*/ }, text = "Chercher ce que vous voulez")
+        SearchBarContainer(onClick = { /*TODO*/ }, text = "Chercher ce que vous voulez")
     }
 }

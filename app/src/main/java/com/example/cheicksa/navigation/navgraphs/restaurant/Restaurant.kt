@@ -1,5 +1,7 @@
-package com.example.cheicksa.navigation.navgraphs
+package com.example.cheicksa.navigation.navgraphs.restaurant
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -14,6 +16,7 @@ import com.example.cheicksa.presentation.restaurantcreens.OrderScreen
 import com.example.cheicksa.presentation.restaurantcreens.Ordering
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 fun NavGraphBuilder.restaurantNav(
     navController: NavController
 ){
@@ -40,11 +43,6 @@ fun NavGraphBuilder.restaurantNav(
             route = RestaurantScreens.Order.route,
         ){
             OrderScreen(navController = navController,)
-        }
-        composable(
-            route = RestaurantScreens.Cart.route ,
-        ){
-            Cart(navController = navController,)
         }
     }
     //TODO("documenting the fuction")

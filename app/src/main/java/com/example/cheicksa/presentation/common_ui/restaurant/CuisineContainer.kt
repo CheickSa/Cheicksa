@@ -29,6 +29,7 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.cheicksa.presentation.viewmodels.MenuViewModel
+import com.example.cheicksa.ui.theme.montSarrat
 
 /**
  * [CuisineContainer] is a composable function used to display a cuisine container card in a UI. It typically consists of an
@@ -95,7 +96,9 @@ fun CuisineContainer(
                         .width(70.dp)
                         .clip(RoundedCornerShape(10.dp))
                 ),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            fontFamily = montSarrat
+
         )
     }
 }

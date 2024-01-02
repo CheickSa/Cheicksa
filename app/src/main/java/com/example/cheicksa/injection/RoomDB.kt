@@ -1,6 +1,8 @@
 package com.example.cheicksa.injection
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.room.Room
 import com.example.cheicksa.AppDatabase
 import dagger.Module
@@ -13,6 +15,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object RoomDB {
+    @RequiresApi(Build.VERSION_CODES.O)
     @Provides
     @Singleton
     fun provideRoomDB(
@@ -20,7 +23,7 @@ object RoomDB {
     ): AppDatabase  {
         return Room.databaseBuilder(
             applicationContext,
-            AppDatabase::class.java, "order-database"
+            AppDatabase::class.java, "order-database8"
         ).build()
     }
 }

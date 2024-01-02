@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.cheicksa.R
 import com.example.cheicksa.ui.theme.CheicksaTheme
+import com.example.cheicksa.ui.theme.montSarrat
 
 /**
  * [StoreContainer] is a composable function that represents a store container card in a UI. It is typically used to display
@@ -73,7 +74,8 @@ fun StoreContainer(
                     fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
                     fontSize = MaterialTheme.typography.titleLarge.fontSize,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 5.dp, start = 5.dp)
+                    modifier = Modifier.padding(top = 5.dp, start = 5.dp),
+                    fontFamily = montSarrat
                 )
                 if (applyComingSoon){
                     Text(

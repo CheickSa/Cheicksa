@@ -6,9 +6,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -17,7 +22,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -30,9 +34,8 @@ import com.example.cheicksa.R
 import com.example.cheicksa.presentation.Cuisines
 import com.example.cheicksa.presentation.Restaurant
 import com.example.cheicksa.presentation.common_ui.restaurant.RestaurantContainer
-import com.example.cheicksa.presentation.common_ui.restaurant.SearchBar
+import com.example.cheicksa.presentation.common_ui.restaurant.SearchBarContainer
 import com.example.cheicksa.presentation.common_ui.restaurant.StoreContainer
-import com.example.cheicksa.presentation.lesRestaurants
 import com.example.cheicksa.presentation.viewmodels.MenuViewModel
 import com.example.cheicksa.ui.theme.CheicksaTheme
 
@@ -47,15 +50,33 @@ fun Menu(
     Scaffold (
         topBar = {
             TopAppBar(title = {
-                SearchBar(
-                    height = 44.dp,
+                SearchBarContainer(
                     color = MaterialTheme.colorScheme.secondary,
                     onClick = {},
                     text = "Chercher un restaurant ou une nourriture",
-                    description = ""
+                    description = "",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp)
+                        .padding(start = 10.dp, end = 10.dp)
                 )
             },
-                scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+                scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
+                navigationIcon = {
+                    IconButton(
+                        onClick = { navController.popBackStack() },
+                        modifier = Modifier
+                            .padding(start = 10.dp)
+                            .size(30.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "",
+                            modifier = Modifier
+                                .fillMaxSize(),
+                        )
+                    }
+                }
             )
         }
     ){

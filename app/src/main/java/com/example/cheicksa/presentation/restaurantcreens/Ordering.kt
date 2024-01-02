@@ -1,8 +1,9 @@
 package com.example.cheicksa.presentation.restaurantcreens
 
+import android.os.Build
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.Image
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,12 +19,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,6 +32,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,22 +48,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -72,13 +68,14 @@ import coil.request.ImageRequest
 import com.example.cheicksa.R
 import com.example.cheicksa.model.restaurant.Extra
 import com.example.cheicksa.model.restaurant.OrderInfo
-import com.example.cheicksa.model.restaurant.OrderScreenCardData
 import com.example.cheicksa.navigation.RestaurantScreens
 import com.example.cheicksa.presentation.viewmodels.MenuViewModel
 import com.example.cheicksa.presentation.viewmodels.RoomViewModel
 import com.example.cheicksa.ui.theme.CheicksaTheme
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Ordering(
@@ -93,8 +90,16 @@ fun Ordering(
     var extraList by remember { mutableStateOf<List<Extra>>(listOf()) }
     val scope = rememberCoroutineScope()
 
-    //if (data == null) { return }
+    val orders = roomViewModel.orders().asFlow().collectAsState(initial = listOf()).value
+
+    val snackBarHostState = remember { SnackbarHostState() }
+
     Scaffold (
+        snackbarHost = {
+            SnackbarHost(snackBarHostState){
+                Snackbar(snackbarData = it,)
+            }
+        },
         bottomBar = {
             BottomAppBar {
                 Row(
@@ -144,7 +149,12 @@ fun Ordering(
                         extras = extraList,
                         quantity = amount.value,
                         totalPrice = (data.price * amount.value),
-                        mealListId = mealListId ?: ""
+                        mealListId = mealListId ?: "",
+                        title = data.title,
+                        specialRequest = instructions,
+                        time = LocalDateTime.now().toString(),
+                        imageUlr = data.imageUlr,
+                        initPrice = data.price
                     )
                     Card(
                         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.tertiary),
@@ -155,9 +165,25 @@ fun Ordering(
                             .align(Alignment.CenterVertically),
                         onClick = {
                             scope.launch {
-                                roomViewModel.insertOrder(
-                                    orderTobePlace
+                                val existingOrder = orders.find { it.mealId == orderTobePlace.mealId }
+                                if (existingOrder != null) {
+                                    roomViewModel.upsertOrder(existingOrder.copy(
+                                        quantity = orderTobePlace.quantity + existingOrder.quantity,
+                                        totalPrice = orderTobePlace.totalPrice + existingOrder.totalPrice,
+                                        extras = (orderTobePlace.extras + existingOrder.extras).toSet().toList()
+                                    ))
+                                } else {
+                                    roomViewModel.insertOrder(orderTobePlace)
+                                }
+                                //navController.navigate(RestaurantScreens.Cart.route)
+                                val action = snackBarHostState.showSnackbar(
+                                    message = "Commande ajoutée au panier",
+                                    actionLabel = "Panier",
+                                    duration = SnackbarDuration.Short,
                                 )
+                                if (action == SnackbarResult.ActionPerformed) {
+                                    navController.navigate(RestaurantScreens.Cart.route)
+                                }
                             }
 
                             //Log.d("Ordering", "Ordering: $orders")
@@ -271,9 +297,6 @@ fun Ordering(
 
             items(data.extra.size) {
                 val extra = data.extra[it]
-                if (data.extra.isNotEmpty()) {
-                    Divider(modifier = Modifier.padding(10.dp))
-                }
                 var checked by remember { mutableStateOf(false) }
                 Row (
                     modifier = Modifier
@@ -282,29 +305,32 @@ fun Ordering(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Checkbox(
-                        checked = checked,
-                        onCheckedChange = {
-                            checked = it
-                            if (checked) {
-                                extraList += listOf(extra)
-                            } else {
-                                extraList = extraList.filter { it !in listOf(extra) }
-                            }
-                        },
-                        modifier = Modifier
-                            .height(16.dp)
-                            .width(16.dp),
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = extra.name,
-                        modifier = Modifier,
-                        fontWeight = MaterialTheme.typography.titleMedium.fontWeight,
-                        fontSize = MaterialTheme.typography.titleMedium.fontSize,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Row (
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ){
+                        Checkbox(
+                            checked = checked,
+                            onCheckedChange = {
+                                checked = it
+                                if (checked) {
+                                    extraList += listOf(extra)
+                                } else {
+                                    extraList = extraList.filter { it !in listOf(extra) }
+                                }
+                            },
+                            modifier = Modifier
+                                .height(16.dp)
+                                .width(16.dp),
+                        )
+                        Text(
+                            text = extra.name,
+                            modifier = Modifier,
+                            fontWeight = MaterialTheme.typography.titleMedium.fontWeight,
+                            fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                     Text(
                         text = extra.price + " " + stringResource(id = R.string.devise) + " ",
                         fontWeight = MaterialTheme.typography.titleMedium.fontWeight,
@@ -314,6 +340,7 @@ fun Ordering(
                     )
 
                 }
+                Spacer(modifier = Modifier.height(5.dp))
 
             }
             item {
@@ -370,6 +397,7 @@ fun Ordering(
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview
 @Composable
 private fun _Ordering() {

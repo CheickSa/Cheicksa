@@ -12,7 +12,7 @@ import kotlinx.serialization.encoding.Encoder
 
 @Serializable
 data class RestaurantData(
-    val id: Long = 0L,
+    val id: String = "",
     val image: Int = 0,
     val imageUrl: String = "",
     val name: String = "",
@@ -37,7 +37,7 @@ data class RestaurantData(
     val isBlocked: Boolean = false,
 ){
     constructor(): this(
-        id = 0L,
+        id = "",
         image = 0,
         imageUrl = "",
         name = "",

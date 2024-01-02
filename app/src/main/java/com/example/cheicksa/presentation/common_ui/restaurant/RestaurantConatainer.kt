@@ -1,14 +1,11 @@
 package com.example.cheicksa.presentation.common_ui.restaurant
 
-import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,13 +23,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -40,13 +38,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.cheicksa.R
-import com.example.cheicksa.navigation.RestaurantScreens
+import com.example.cheicksa.ui.theme.montSarrat
 
 /**
  * [RestaurantContainer] is a composable function that represents a restaurant container card in a UI. It displays information
@@ -63,7 +59,7 @@ import com.example.cheicksa.navigation.RestaurantScreens
  * @param onClick The action to perform when the restaurant container is clicked.
  * @param deliveryTime The estimated delivery time for orders from the restaurant.
  * @param emoji The emoji associated with the restaurant's cuisine.
- * @param isFavorite Whether the restaurant is a favorite or not.
+ * @param favorite Whether the restaurant is a favorite or not.
  * @param onFavoriteClick The action to perform when the favorite icon is clicked.
  * @param isVerified Whether the restaurant is verified or not.
  * @param loading Whether the restaurant container is loading or not.
@@ -87,11 +83,12 @@ fun RestaurantContainer(
     onClick: () -> Unit = {},
     deliveryTime: Double=0.0,
     emoji: String = "",
-    isFavorite: Boolean = false,
+    favorite: Boolean = false,
     onFavoriteClick: () -> Unit = {},
-    isVerified: Boolean= false ,
+    isVerified: Boolean= false,
     loading: Boolean = false
 ) {
+    var isFavorite by remember { mutableStateOf(favorite) }
 
     Column(
         modifier = Modifier,
@@ -145,6 +142,7 @@ fun RestaurantContainer(
                             .padding(3.dp),
                         textAlign = TextAlign.Start,
                         color = MaterialTheme.colorScheme.primary,
+                        fontFamily = montSarrat
                     )
                 }
 
@@ -164,7 +162,10 @@ fun RestaurantContainer(
                             //.align(Alignment.TopEnd)
                             .padding(1.dp)
                             .size(18.dp)
-                            .clickable { onFavoriteClick.invoke() }
+                            .clickable {
+                                isFavorite = !isFavorite
+                                onFavoriteClick.invoke()
+                            }
                     )
                 }
             }
@@ -172,7 +173,6 @@ fun RestaurantContainer(
         Spacer(modifier = Modifier.height(8.dp))
         Row (
             verticalAlignment = Alignment.CenterVertically,
-
         ){
             Text(
                 text = name,
@@ -182,11 +182,14 @@ fun RestaurantContainer(
                 modifier = textModifier
                     .shimmerEffect(
                         enabled = loading,
-                        secondModifier = Modifier.width(150.dp)
+                        secondModifier = Modifier
+                            .width(150.dp)
                             .padding(3.dp)
                             .clip(RoundedCornerShape(10.dp))
                     ),
-                textAlign = TextAlign.Start
+                textAlign = TextAlign.Start,
+                fontFamily = montSarrat
+
             )
             Spacer(modifier = Modifier.width(5.dp))
             if (isVerified){
@@ -198,47 +201,55 @@ fun RestaurantContainer(
             }
         }
         Text(
-            text = emoji + stringResource(id = R.string.space) + category,
+            text = "$category - " + if (mimOrder != null)  mimOrder.toString() + stringResource(R.string.space)
+                    + stringResource(id = R.string.devise) + stringResource(R.string.space)
+                    + stringResource(R.string.min_order)
+            else "",
             fontWeight = MaterialTheme.typography.titleSmall.fontWeight,
             fontSize = MaterialTheme.typography.titleSmall.fontSize,
             color = MaterialTheme.colorScheme.primary,
             modifier = textModifier
                 .shimmerEffect(
                     enabled = loading,
-                    secondModifier = Modifier.width(90.dp)
+                    secondModifier = Modifier
+                        .width(90.dp)
                         .padding(3.dp)
                         .clip(RoundedCornerShape(10.dp))
                 ),
-            textAlign = TextAlign.Start
+            textAlign = TextAlign.Start,
+            fontFamily = montSarrat
         )
         Row (
             modifier = textModifier
                 .shimmerEffect(
                     enabled = loading,
-                    secondModifier = Modifier.width(200.dp)
+                    secondModifier = Modifier
+                        .width(200.dp)
                         .padding(3.dp)
                         .clip(RoundedCornerShape(10.dp))
                 )
         ){
-            Text(
-                text = if (mimOrder != null)  mimOrder.toString() + stringResource(R.string.space)
-                    + stringResource(id = R.string.devise) + stringResource(R.string.space)
-                    + stringResource(R.string.min_order)
-                else ""
-                ,
-                fontWeight = MaterialTheme.typography.titleSmall.fontWeight,
-                fontSize = MaterialTheme.typography.titleSmall.fontSize,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier,
-                textAlign = TextAlign.Start
-            )
+//            Text(
+//                text = if (mimOrder != null)  mimOrder.toString() + stringResource(R.string.space)
+//                    + stringResource(id = R.string.devise) + stringResource(R.string.space)
+//                    + stringResource(R.string.min_order)
+//                else ""
+//                ,
+//                fontWeight = MaterialTheme.typography.titleSmall.fontWeight,
+//                fontSize = MaterialTheme.typography.titleSmall.fontSize,
+//                color = MaterialTheme.colorScheme.primary,
+//                modifier = Modifier,
+//                textAlign = TextAlign.Start,
+//                fontFamily = montSarrat
+//            )
             Text(
                 text = if (mimOrder != null) stringResource(R.string.delivery_fee,deliveryFee) +
                         stringResource(R.string.devise) else "",
                 fontWeight = MaterialTheme.typography.titleSmall.fontWeight,
                 fontSize = MaterialTheme.typography.titleSmall.fontSize,
                 modifier = Modifier,
-                textAlign = TextAlign.Start
+                textAlign = TextAlign.Start,
+                fontFamily = montSarrat
             )
         }
     }
