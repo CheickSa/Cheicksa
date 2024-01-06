@@ -47,7 +47,6 @@ class GptViewModel @Inject constructor(
     private val db = Firebase.firestore
     private val chatRef = db.collection("chats")
         .document("users")
-        .collection("chats")
 
     private val menuViewModel = MenuViewModel()
 
@@ -89,10 +88,32 @@ class GptViewModel @Inject constructor(
         """.trimIndent()
     }
 
+    init {
+        /*
+        chatRef.get()
+            .addOnSuccessListener {
+                val chats = it.data?.get("chats") as List<Map<String, String>>
+                _chats.value = chats.map { chat ->
+                    Chat(
+                        message = chat["message"].toString(),
+                        role = chat["role"].toString(),
+                        restaurantData = null
+                    )
+                }
+            }
+            .addOnFailureListener {
+                Log.d("TAG", "Error getting documents: ", it)
+            }
+         */
+
+    }
+
+    private var userMessage = Chat()
+
 
     fun setRequest(message: String) {
         _chats.value += Chat(message = message, role = "user")
-
+        userMessage = Chat(message = message, role = "user")
 
 
         // adapt the conversation  the chat gpt api understands and add to the request
@@ -214,7 +235,7 @@ class GptViewModel @Inject constructor(
                 val responseRestau2 =  restaurants.filter {resto->
                     resto.category == responseObject.foodCategory
                 }
-                val responseRestau = responseRestau1 + responseRestau2
+                val responseRestau = (responseRestau1 + responseRestau2).toSet().toList()
                 // the exact meal
                 val meals1 = responseRestau.map { it.mealsList.map { meal ->
                     meal.cards.filter { card ->
@@ -231,11 +252,13 @@ class GptViewModel @Inject constructor(
                 }
                 }.flatten().flatten()
 
-                val meals = meals1 + meals2
+                val meals = (meals1 + meals2).toSet().toList()
                 Log.d("rep", "getResponse: $meals")
 
                 _chats.value += Chat(message = message.toString(), role = "assistant", restaurantData = responseRestau, meals = meals)
             }
+
+            chatRef.set(mapOf("chats" to _chats.value))
         }
         else {
             _response.value = null

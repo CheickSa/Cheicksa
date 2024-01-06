@@ -18,6 +18,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -62,8 +63,10 @@ fun HomeScreen(
     menuViewModel: MenuViewModel = viewModel()
 ) {
     val restaurants by menuViewModel.restaurants.collectAsState()
-
+    val snackBarHost =  SnackbarHostState()
     Scaffold (
+        snackbarHost = {
+        },
         topBar = {
             TopAppBar(title = {
                 SearchBarContainer(
@@ -74,7 +77,7 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(44.dp)
-                        .padding(start = 20.dp, end = 20.dp)
+                        .padding(start = 0.dp, end = 20.dp)
                 )
             },
                 scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),

@@ -82,13 +82,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.asFlow
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cheicksa.R
 import com.example.cheicksa.model.gpt.Chat
 import com.example.cheicksa.model.gpt.response.ResponseObject
+import com.example.cheicksa.model.restaurant.MealsList
+import com.example.cheicksa.navigation.RestaurantScreens
+import com.example.cheicksa.presentation.Restaurant
+import com.example.cheicksa.presentation.common_ui.restaurant.LoadingAnimation
 import com.example.cheicksa.presentation.common_ui.restaurant.RestaurantContainer
+import com.example.cheicksa.presentation.lesRestaurants
+import com.example.cheicksa.presentation.restaurantcreens.OrderCards
+import com.example.cheicksa.presentation.restaurantcreens.mealsList
 import com.example.cheicksa.presentation.viewmodels.GptViewModel
+import com.example.cheicksa.presentation.viewmodels.MenuViewModel
 import com.example.cheicksa.presentation.viewmodels.RoomViewModel
 import com.example.cheicksa.ui.theme.CheicksaTheme
 import com.example.cheicksa.ui.theme.montSarrat
@@ -106,11 +115,12 @@ fun ChatScreen(navController: NavController) {
     val chatViewModel = hiltViewModel<GptViewModel>(LocalContext.current as ComponentActivity)
     val roomViewModel = hiltViewModel<RoomViewModel>()
 
+    val menuViewModel: MenuViewModel= viewModel(LocalContext.current as ComponentActivity)
+
     val chat by chatViewModel.chats
     val thinking by chatViewModel.thinking
-    val response by chatViewModel.response.collectAsState()
-    val toolData by chatViewModel.toolData.collectAsState()
-    val restaurants by chatViewModel.restaurantsList.collectAsState()
+    var thinkingFinished by remember { mutableStateOf(false) }
+
     var isSearch by remember { mutableStateOf(false) }
     val state = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -201,7 +211,7 @@ fun ChatScreen(navController: NavController) {
                             )
                         }
                         Text(
-                            text = "Hello, I'm Cheicksa IA",
+                            text = "Hello, I'm your Assistant IA",
                             style = TextStyle(
                                 fontSize = 20.sp,
                                 lineHeight = 24.sp,
@@ -241,46 +251,42 @@ fun ChatScreen(navController: NavController) {
                                 )
 
                                 if (message[1].meals != null){
+                                    val meal = message[1].meals
+                                    OrderCards(
+                                        data = MealsList(
+                                            cards = meal!!,
+                                            mealTitle = "Pour Vous"
+                                        ),
+                                        navController = navController,
+                                    )
                                 }
                                 if (message[1].restaurantData != null) {
                                     val restaurants = message[1].restaurantData
-                                    restaurants?.forEach {
-                                        val restaurant = it
-                                        RestaurantContainer(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(225.dp)
-                                                .padding(
-                                                    start = 16.dp,
-                                                    end = 16.dp,
-                                                    top = 16.dp
-                                                ),
-                                            textModifier = Modifier.padding(start = 16.dp),
-                                            image = restaurant.imageUrl,
-                                            name = restaurant.name,
-                                            category = restaurant.category,
-                                            mimOrder = restaurant.minOrder,
-                                            deliveryFee = restaurant.deliveryFee,
-                                            deliveryTime = restaurant.deliveryTime,
-                                            isVerified = restaurant.isVerified,
-                                        )
-                                    }
-                                }
-                                scope.launch {
-                                    state.animateScrollToItem(chat.size)
+                                    Restaurant(
+                                        title = "Pour Vous",
+                                        navController = navController,
+                                        restaurants = restaurants!!
+                                    )
                                 }
 
                             }
-
+                            // Scroll down when new items are added
+                            if(thinkingFinished){
+                                LaunchedEffect(key1 = thinkingFinished){
+                                    state.animateScrollToItem(chat.size)
+                                }
+                            }
                         }
                     }
                 }
             }
             if (thinking){
-                CircularProgressIndicator(
+                LoadingAnimation(
                     modifier = Modifier
-                        .align(Alignment.Center)
+                        .fillMaxSize()
                 )
+            }else{
+                thinkingFinished = true
             }
             MessageField(
                 navController = navController,
@@ -546,11 +552,20 @@ private fun _ChatContainer() {
 
 }
 
+
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun KeyboardAwareTextFieldPreview() {
     CheicksaTheme {
-        ChatScreen(rememberNavController())
+        val meal = mealsList[0]
+
+        OrderCards(
+            data = meal,
+            navController = rememberNavController(),
+            menuViewModel = viewModel()
+        )
+
     }
 }

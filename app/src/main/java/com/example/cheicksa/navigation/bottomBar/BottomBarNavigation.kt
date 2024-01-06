@@ -31,13 +31,13 @@ sealed class BottomBarNavigation (
     data object Favorites : BottomBarNavigation(
         "favorites_bottom_bar",
         Icons.Filled.Favorite,
-        "edit",
+        "Favoris",
         Icons.Outlined.FavoriteBorder
     )
     data object Cart : BottomBarNavigation(
         RestaurantScreens.Cart.route,
         Icons.Filled.ShoppingCart,
-        "bill",
+        "Cart",
         Icons.Outlined.ShoppingCart
     )
     data object Profile : BottomBarNavigation(

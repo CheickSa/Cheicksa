@@ -15,7 +15,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object RoomDB {
-    @RequiresApi(Build.VERSION_CODES.O)
     @Provides
     @Singleton
     fun provideRoomDB(
@@ -23,7 +22,7 @@ object RoomDB {
     ): AppDatabase  {
         return Room.databaseBuilder(
             applicationContext,
-            AppDatabase::class.java, "order-database8"
+            AppDatabase::class.java, "order-database10"
         ).build()
     }
 }

@@ -10,11 +10,11 @@ import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import java.time.LocalDateTime
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Entity
 data class OrderInfo(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
+    val userId: String = "",
     val restaurantId: String = "",
     val mealListId: String = "",
     val mealId: String = "",
@@ -28,6 +28,7 @@ data class OrderInfo(
     @Embedded
     val address: Address? = null,
     val initPrice: Double = 0.0,
+    val completed: Boolean = false,
 )
 
 class ExtraTypeConverter {

@@ -62,6 +62,7 @@ class MenuViewModel : ViewModel() {
                     _restaurants.value += listOf(document.toObject(RestaurantData::class.java))
                     Log.d("db"," ${document.id} => ${document.data}")
                 }
+                _restaurants.value = _restaurants.value.shuffled()
             }
             .addOnFailureListener {
                 Log.d("TAG", "Error getting documents: ", it)

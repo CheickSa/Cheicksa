@@ -19,7 +19,7 @@ import com.maxkeppeker.sheets.core.views.Grid
 fun MealContainer(modifier: Modifier = Modifier) {
     val list = listOf(
         "aasd","sdsds","dccdacc","aas","sds","sx","jbjjbj","jnnjjn")
-    Grid(modifier = Modifier , items = list , columns = 3 , rowSpacing = 10.dp , columnSpacing = 10.dp) {
+    Grid(modifier = Modifier , items = list , columns = 3 , rowSpacing = 10.dp , columnSpacing = 0.dp) {
         Card(
             onClick = { /*TODO*/ },
             modifier = Modifier

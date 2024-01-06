@@ -31,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cheicksa.R
+import com.example.cheicksa.navigation.RestaurantScreens
 import com.example.cheicksa.presentation.Cuisines
 import com.example.cheicksa.presentation.Restaurant
 import com.example.cheicksa.presentation.common_ui.restaurant.RestaurantContainer
@@ -116,6 +117,10 @@ fun Menu(
                     image = restaurant.imageUrl,
                     deliveryTime = restaurant.deliveryTime,
                     isVerified = restaurant.isVerified,
+                    onClick ={
+                        menuViewModel.setRestaurant(restaurant)
+                        navController.navigate(RestaurantScreens.Order.route)
+                    }
                 )
             }
         }

@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -87,7 +88,7 @@ fun Cart(
 ) {
 
     val restaurants by menuViewModel.restaurants.collectAsState()
-    val orders = roomViewModel.orders().asFlow().collectAsState(initial = listOf()).value
+    val orders = roomViewModel.orders().asFlow().collectAsState(initial = listOf()).value.filter { !it.completed }
 
     val database = Firebase.database
     val myRef = database.reference.child("orders")
@@ -95,13 +96,15 @@ fun Cart(
 
     val scope = rememberCoroutineScope()
 
+    val restaurant = restaurants.find { restaurant ->  orders.all { restaurant.id == it.restaurantId } }
+
 
     val context = LocalContext.current
     Log.d("Cart", "Cart: $orders")
     Permission()
     Scaffold(
         topBar={
-            val restaurant = restaurants.find { restaurant ->  orders.all { restaurant.id == it.restaurantId } }
+
             TopAppBar(
                 title = {
                     Column {
@@ -129,6 +132,18 @@ fun Cart(
                         )
                     }
                 },
+                actions = {
+                    IconButton(onClick = {
+                        scope.launch {
+                            roomViewModel.deleteAllOrders()
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = ""
+                        )
+                    }
+                }
 
             )
         },
@@ -136,16 +151,63 @@ fun Cart(
             BottomAppBar (
                 contentPadding = PaddingValues(5.dp)
             ){
-                Button(
-                    onClick = { /*TODO*/ },
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(70.dp)
                         .padding(10.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    contentPadding = PaddingValues(10.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Confirmer")
+                    Column {
+                        val total = orders.sumOf{ it.totalPrice }
+                        val restaurant = restaurants.find { restaurant ->  orders.all { restaurant.id == it.restaurantId } }
+
+                        Text(
+                            text = "Total: ${total + restaurant?.deliveryFee!!} " + stringResource(
+                                id = R.string.devise
+                            ),
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = montSarrat,
+                            color = Color.Black
+                        )
+                        if(total!=0.0){
+
+                            Text(
+                                text = "Delivery: ${restaurant.deliveryFee} " + stringResource(
+                                    id = R.string.devise
+                                ),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = montSarrat,
+                                color = Color.Black
+                            )
+                        }
+                    }
+                    Button(
+                        onClick = {
+                            restaurant?.id?.let {
+                                myRef.child(it)
+                                    .setValue(orders)
+                                    .addOnCompleteListener { task ->
+                                        if (task.isSuccessful){
+                                            scope.launch {
+                                                roomViewModel.deleteAllOrders()
+                                            }
+                                        }else {
+                                            Toast.makeText(context, "Erreur", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                            }
+                        },
+                        modifier = Modifier
+                            .height(70.dp)
+                            .padding(5.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp)
+                    ) {
+                        Text(text = "Confirmer")
+                    }
                 }
             }
         }
@@ -168,17 +230,7 @@ fun Cart(
                     },
                     onClick = {
                         // TODO: Impliment the order processing
-                        myRef.child(orders[index].restaurantId)
-                            .setValue(orders[index])
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful){
-                                    scope.launch {
-                                        roomViewModel.deleteOrderById(orders[index].id)
-                                    }
-                                }else {
-                                    Toast.makeText(context, "Erreur", Toast.LENGTH_SHORT).show()
-                                }
-                            }
+
                     }
                 )
             }

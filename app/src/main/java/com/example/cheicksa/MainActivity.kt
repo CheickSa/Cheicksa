@@ -9,8 +9,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -27,10 +34,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.asFlow
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -40,7 +51,9 @@ import com.example.cheicksa.navigation.NavConstants
 import com.example.cheicksa.navigation.bottomBar.BottomBarNavigation
 import com.example.cheicksa.navigation.navhost.AppNavHost
 import com.example.cheicksa.presentation.viewmodels.NetworkViewModel
+import com.example.cheicksa.presentation.viewmodels.RoomViewModel
 import com.example.cheicksa.ui.theme.CheicksaTheme
+import com.example.cheicksa.ui.theme.montSarrat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -60,7 +73,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(it),
-                        color = MaterialTheme.colorScheme.background
+                        color = MaterialTheme.colorScheme.tertiary
                     ) {
                         AppNavHost(navController = navController)
                     }
@@ -113,6 +126,10 @@ class MainActivity : ComponentActivity() {
 fun BottomBar(
     navController: NavController,
 ) {
+    // if current destination is shop on va dire bottomBarNavigationItems = listOF(Home, Favorites, Cart, Profile)
+    // pour shop donc comme ca va mettre les buttom bar de shop comme pour restaurant automatiquement on va
+    // melanger les cart des shop et restaurant etc
+    /// if (currentRoute?.hierarchy?.any { it.route == RESTAURANT_ROUTE } == true
     val bottomBarNavigationItems = listOf(
         BottomBarNavigation.Home,
         BottomBarNavigation.Favorites,
@@ -120,10 +137,11 @@ fun BottomBar(
         BottomBarNavigation.Cart,
         BottomBarNavigation.Profile,
     )
+    val roomViewModel: RoomViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination
     if (currentRoute?.hierarchy?.any { it.route == NavConstants.AUTH_ROUTE } == false &&
-        currentRoute?.hierarchy?.any { it.route == NavConstants.HOME_SCREEN_ROUTE } == false
+        !currentRoute.hierarchy.any { it.route == NavConstants.HOME_SCREEN_ROUTE }
     ) {
         NavigationBar(
             modifier = Modifier
@@ -136,23 +154,28 @@ fun BottomBar(
             containerColor = MaterialTheme.colorScheme.tertiary,
         ) {
             bottomBarNavigationItems.forEach { bottomBarNavigation ->
-                val isSelected =
-                    currentRoute?.hierarchy?.any { it.route == bottomBarNavigation.route } == true
+                val isSelected = currentRoute.hierarchy.any { it.route == bottomBarNavigation.route }
+                val badgeNum = roomViewModel.orders().asFlow().collectAsState(initial = null).value?.size
                 BottomBarItem(
                     navController = navController,
                     bottomBarNavigation = bottomBarNavigation,
                     isSelected = isSelected,
+                    applyBadge = bottomBarNavigation == BottomBarNavigation.Cart && badgeNum != null,
+                    badgeNum = badgeNum ?: 0
                 )
             }
         }
     }
 
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RowScope.BottomBarItem(
     navController: NavController,
     bottomBarNavigation: BottomBarNavigation,
     isSelected: Boolean,
+    applyBadge: Boolean = false,
+    badgeNum: Int = 0,
 ) {
     val scope = rememberCoroutineScope()
     NavigationBarItem(
@@ -172,17 +195,38 @@ fun RowScope.BottomBarItem(
             }
         },
         icon = {
-            val icon = if (!isSelected) bottomBarNavigation.iconOutlined else bottomBarNavigation.icon
-            if (icon is ImageVector)
-                Icon(
-                    imageVector = icon,
-                    contentDescription = bottomBarNavigation.title,
-                )
-            else if (icon is Int){
-                Icon(
-                    painter = painterResource(id = icon),
-                    contentDescription = bottomBarNavigation.title,
-                )
+            BadgedBox(
+                badge = {
+                    if (applyBadge && badgeNum != 0)
+                        Card(
+                            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.background),
+                            modifier = Modifier
+                        ) {
+                            Text(
+                                text = badgeNum.coerceAtMost(99).toString(),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .padding(horizontal= 3.dp)
+                                    .padding(2.dp),
+                                fontFamily = montSarrat,
+                            )
+                        }
+                } ,
+                modifier = Modifier
+            ) {
+                val icon = if (!isSelected) bottomBarNavigation.iconOutlined else bottomBarNavigation.icon
+                if (icon is ImageVector)
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = bottomBarNavigation.title,
+                    )
+                else if (icon is Int){
+                    Icon(
+                        painter = painterResource(id = icon),
+                        contentDescription = bottomBarNavigation.title,
+                    )
+                }
             }
         },
         label = { Text(bottomBarNavigation.title) },
@@ -214,5 +258,6 @@ fun GreetingPreview() {
     val viewModel = hiltViewModel<NetworkViewModel>()
     CheicksaTheme {
         Greeting(viewModel)
+        //BottomBar(navController = rememberNavController())
     }
 }

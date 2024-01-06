@@ -374,7 +374,7 @@ fun Meals(
 fun OrderCards(
     data: MealsList,
     navController: NavController,
-    menuViewModel: MenuViewModel,
+    menuViewModel: MenuViewModel = viewModel(LocalContext.current as ComponentActivity),
     showcomments: Boolean = false
 ) {
     Column(

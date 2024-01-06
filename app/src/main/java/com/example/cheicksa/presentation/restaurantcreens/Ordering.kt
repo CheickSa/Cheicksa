@@ -69,9 +69,13 @@ import com.example.cheicksa.R
 import com.example.cheicksa.model.restaurant.Extra
 import com.example.cheicksa.model.restaurant.OrderInfo
 import com.example.cheicksa.navigation.RestaurantScreens
+import com.example.cheicksa.presentation.common_ui.restaurant.ShowOrderDetails
 import com.example.cheicksa.presentation.viewmodels.MenuViewModel
 import com.example.cheicksa.presentation.viewmodels.RoomViewModel
 import com.example.cheicksa.ui.theme.CheicksaTheme
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
@@ -93,6 +97,7 @@ fun Ordering(
     val orders = roomViewModel.orders().asFlow().collectAsState(initial = listOf()).value
 
     val snackBarHostState = remember { SnackbarHostState() }
+    val useCase = rememberUseCaseState()
 
     Scaffold (
         snackbarHost = {
@@ -154,7 +159,8 @@ fun Ordering(
                         specialRequest = instructions,
                         time = LocalDateTime.now().toString(),
                         imageUlr = data.imageUlr,
-                        initPrice = data.price
+                        initPrice = data.price,
+                        userId = Firebase.auth.currentUser?.uid ?: ""
                     )
                     Card(
                         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.tertiary),
@@ -165,6 +171,10 @@ fun Ordering(
                             .align(Alignment.CenterVertically),
                         onClick = {
                             scope.launch {
+                                if (!orders.isEmpty() && orders.any{it.restaurantId != orderTobePlace.restaurantId}){
+                                    useCase.show()
+                                    return@launch
+                                }
                                 val existingOrder = orders.find { it.mealId == orderTobePlace.mealId }
                                 if (existingOrder != null) {
                                     roomViewModel.upsertOrder(existingOrder.copy(
@@ -201,6 +211,37 @@ fun Ordering(
                             color = MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center
 
+                        )
+                        ShowOrderDetails(
+                            state = useCase,
+                            title = "Vous avez une commande en cours",
+                            negativeText = "Annuler",
+                            positiveText = "Vider et Ajouter",
+                            onPositiveClick = {
+                                scope.launch {
+                                    roomViewModel.deleteAllOrders()
+                                    val existingOrder = orders.find { it.mealId == orderTobePlace.mealId }
+                                    if (existingOrder != null) {
+                                        roomViewModel.upsertOrder(existingOrder.copy(
+                                            quantity = orderTobePlace.quantity + existingOrder.quantity,
+                                            totalPrice = orderTobePlace.totalPrice + existingOrder.totalPrice,
+                                            extras = (orderTobePlace.extras + existingOrder.extras).toSet().toList()
+                                        ))
+                                    } else {
+                                        roomViewModel.insertOrder(orderTobePlace)
+                                    }
+                                    //navController.navigate(RestaurantScreens.Cart.route)
+                                    val action = snackBarHostState.showSnackbar(
+                                        message = "Commande ajoutée au panier",
+                                        actionLabel = "Panier",
+                                        duration = SnackbarDuration.Short,
+                                    )
+                                    if (action == SnackbarResult.ActionPerformed) {
+                                        navController.navigate(RestaurantScreens.Cart.route)
+                                    }
+
+                                }
+                            }
                         )
 
                     }
